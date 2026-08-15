@@ -1,3 +1,4 @@
+import * as Linking from 'expo-linking';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
@@ -18,7 +19,22 @@ export default function ForgotPassword() {
   async function sendReset() {
     setError(null);
     setLoading(true);
-    const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim());
+
+    /**
+     * Without `redirectTo` the emailed link lands on the project's Site URL,
+     * which defaults to `http://localhost:3000` — a page that does not exist,
+     * on a host the phone cannot reach. Locally this never showed up, because
+     * the local stack's Site URL happens to be the dev server.
+     *
+     * `createURL` resolves per platform: `savi://reset-password` in a dev
+     * client or release build, `exp://…/--/reset-password` under Expo Go, and
+     * the origin-relative path on web. Every value it can produce must also be
+     * listed in the project's auth redirect allow-list, or Supabase silently
+     * falls back to the Site URL and the link looks broken again.
+     */
+    const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: Linking.createURL('/reset-password'),
+    });
     setLoading(false);
 
     if (err) {

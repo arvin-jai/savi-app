@@ -19,7 +19,7 @@ a real blocker, not a nice-to-have.
 | 2 | **Android package is `com.anonymous.Savi`** | The Expo template default. It is permanent once published — a Play Store listing cannot change its package name later |
 | 3 | **Privacy policy has placeholders** | [PRIVACY.md](PRIVACY.md) has `[…]` for publisher name, contact address and hosting region. A policy with a placeholder contact is not a policy |
 | 4 | **No crash reporting provider** | The seam exists (`lib/crashReport.ts`), the provider does not |
-| 5 | **Supabase is local only** | There is no hosted project, so there is nothing for a released build to talk to |
+| 5 | ~~**Supabase is local only**~~ — **done** | Hosted project `savi-app` (`sednspswaeevjlfjwttu`, ap-south-1) is linked, all 15 migrations pushed, both Edge Functions deployed. See §2 for what was verified and what was not |
 | 6 | **No device pass since v0.3** | v0.4–v0.7 have run on web only. Three milestones shipped native-only bugs that passed every automated gate |
 
 ---
@@ -47,29 +47,59 @@ npx expo run:android
 
 ---
 
-## 2. Host Supabase
+## 2. Host Supabase — **done**
+
+Project `savi-app`, ref `sednspswaeevjlfjwttu`, region **ap-south-1** (Mumbai), Postgres 17.6.
 
 ```bash
-npx supabase link --project-ref <your-project-ref>
-npx supabase db push          # applies all 14 migrations in order
+npx supabase link --project-ref sednspswaeevjlfjwttu
+npx supabase db push          # applies all 15 migrations in order
 npx supabase functions deploy ai-assistant
 npx supabase functions deploy generate-insights
-npx supabase secrets set OPENAI_API_KEY=sk-...
 ```
 
-Then point the build at it — the anon key is *designed* to be public, so it belongs in the
-client; nothing else does.
+`.env` now points at the hosted project; the previous local values are kept in `.env.local.bak`
+(gitignored via `.env*.bak`) for offline work. The anon key is *designed* to be public and so it
+lives in the client; the service-role key appears nowhere in this repo.
 
-```bash
-EXPO_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co
-EXPO_PUBLIC_SUPABASE_ANON_KEY=<anon key>
-```
+### What was verified
 
-**Verify against the hosted stack before building**, particularly that RLS survived the push:
+Against the hosted stack, with the anon key and no user:
 
-```bash
-npm run db:test:all   # point at the hosted DB, not the local container
-```
+- **All 19 public tables reject an anonymous insert** with `42501 — new row violates row-level
+  security policy`. RLS and the policies survived the push.
+- **`ai-assistant` rejects in the documented order**: no `Authorization` header →
+  `401 UNAUTHORIZED_NO_AUTH_HEADER`; anon key without a user → 401.
+
+### What was **not** verified — do not read the above as a green suite
+
+- **The 8 SQL suites have not been run against hosted.** `npm run db:test:*` is hardcoded to
+  `docker exec supabase_db_Savi` and cannot reach a remote database. Running them needs the DB
+  password and psql directly:
+
+  ```bash
+  psql "$SAVI_DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/hardening.sql
+  ```
+
+  The suites are `begin; … rollback;` so they are safe against a live database, but they insert
+  into `auth.users` and `set local role`, which is unproven under hosted permissions.
+- **The anon-insert sweep is a smoke test, not the isolation test.** It proves anon cannot
+  write. It does *not* prove user A cannot read user B's rows — that is what `rls_and_engine.sql`
+  asserts, and it has not run here.
+- `OPENAI_API_KEY` is still unset on the hosted project, so §3 remains open.
+
+### Auth URL configuration — required, not yet done
+
+Password reset deep-links to `savi://reset-password`. Until that value is in the project's
+redirect allow-list, Supabase falls back to the Site URL — `http://localhost:3000` by default —
+and the link is dead on a phone. In the dashboard, Authentication → URL Configuration:
+
+- **Site URL**: the web deployment's origin
+- **Redirect URLs**: `savi://reset-password`, plus `exp://*/--/reset-password` for Expo Go and
+  the web origin's `/reset-password` for local web testing
+
+Hosted also has **email confirmation on by default** (local has it off), and the built-in SMTP
+is rate-limited to a handful of messages an hour — enough to make testing signup look broken.
 
 ---
 

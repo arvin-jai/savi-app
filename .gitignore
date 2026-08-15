@@ -44,3 +44,6 @@ example
 
 # local env
 .env
+# Backups of .env made when switching between local and hosted Supabase.
+# Not matched by .env*.local above, and they carry real keys.
+.env*.bak

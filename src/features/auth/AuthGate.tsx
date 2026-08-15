@@ -38,9 +38,19 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     // don't require an account to open.
     const inDevGroup = segments[0] === 'dev';
 
+    /**
+     * Password recovery is the one place a session is not a reason to leave.
+     *
+     * The emailed link exchanges a recovery token for a real session *before*
+     * the user has set anything, so the rule below would fire immediately and
+     * bounce them to the dashboard mid-reset — with their old password still
+     * in force and no indication of what went wrong.
+     */
+    const inPasswordReset = inAuthGroup && segments[1] === 'reset-password';
+
     if (!session && !inAuthGroup && !inDevGroup) {
       router.replace('/(auth)/welcome');
-    } else if (session && inAuthGroup) {
+    } else if (session && inAuthGroup && !inPasswordReset) {
       router.replace(HOME);
     }
   }, [session, initialising, segments, navigationState?.key]);

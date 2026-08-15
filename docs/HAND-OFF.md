@@ -302,7 +302,11 @@ discover late:
    `KeyboardAvoidingView`, a pinned composer, and four new screens. Three consecutive milestones
    have shipped native-only bugs that passed every automated gate.
 3. **`com.anonymous.Savi`** — permanent once published.
-4. **No hosted Supabase**, so a released build has nothing to talk to.
+4. ~~No hosted Supabase~~ — **hosted**: `savi-app` / `sednspswaeevjlfjwttu` / ap-south-1. 15
+   migrations pushed, both functions deployed, `.env` repointed. Two things this does *not*
+   mean: the 8 SQL suites still have not run against it (they are wired to `docker exec`), and
+   the auth redirect allow-list still needs `savi://reset-password` in it or password reset
+   dead-ends on the Site URL. See [RELEASE §2](RELEASE.md).
 5. **Privacy policy placeholders.**
 6. **No crash reporting provider** — the seam and its redaction exist, the provider does not.
 

@@ -6,10 +6,9 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Text } from '@/components/ui/Text';
 import { AuthScreen } from '@/features/auth/AuthScreen';
+import { MIN_PASSWORD } from '@/features/auth/password';
 import { authErrorMessage, supabase } from '@/lib/supabase';
 import { space } from '@/theme/tokens';
-
-const MIN_PASSWORD = 6;
 
 export default function SignUp() {
   const [displayName, setDisplayName] = useState('');
