@@ -19,7 +19,7 @@ import type { LucideIcon } from 'lucide-react-native';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BLUR_IS_CHEAP } from '@/components/glass/GlassCard';
+import { ANDROID_BLUR, BLUR_IS_CHEAP, surfaceColor } from '@/components/glass/GlassCard';
 import { useTheme } from '@/theme/ThemeProvider';
 import { a11y, focus, iconSize, layout, radius, space, z } from '@/theme/tokens';
 
@@ -49,6 +49,24 @@ export function GlassNavbar({ tabs, state, navigation }: TabBarProps & { tabs: N
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
+  // A18: Android is translucent either way (see surfaceColor); this is only
+  // about whether the expensive real blur runs behind it.
+  const blurred = BLUR_IS_CHEAP || (Platform.OS === 'android' && ANDROID_BLUR);
+
+  /**
+   * The nav is the one surface where translucency without blur is not simply
+   * free. It floats *over* scrolling content, and `subtle` is 40–45% alpha —
+   * enough for a list to scroll visibly through the icons, which reads as
+   * broken rather than as glass. Blur is what normally absorbs that.
+   *
+   * So without blur the nav steps up to `elevated` (75%): still translucent,
+   * the ambient background and the page still show through, but the content
+   * behind stays a suggestion instead of competing with the tab icons. Every
+   * other glass surface has the page behind it, not moving content, and needs
+   * no such step.
+   */
+  const level = blurred ? theme.glass.subtle : theme.glass.elevated;
+
   return (
     <View
       style={{
@@ -60,8 +78,8 @@ export function GlassNavbar({ tabs, state, navigation }: TabBarProps & { tabs: N
         height: layout.navHeight,
         borderRadius: radius['2xl'],
         borderWidth: 1,
-        borderColor: theme.glass.subtle.border,
-        backgroundColor: BLUR_IS_CHEAP ? theme.glass.subtle.background : theme.glass.subtle.fallback,
+        borderColor: level.border,
+        backgroundColor: surfaceColor(level, blurred),
         overflow: 'hidden',
         flexDirection: 'row',
         ...(Platform.OS === 'android'
@@ -69,11 +87,14 @@ export function GlassNavbar({ tabs, state, navigation }: TabBarProps & { tabs: N
           : { boxShadow: theme.shadow.md.boxShadow }),
       }}
     >
-      {BLUR_IS_CHEAP && (
+      {blurred && (
         <BlurView
-          intensity={theme.glass.subtle.blur}
+          intensity={level.blur}
           tint={theme.isDark ? 'dark' : 'light'}
           style={StyleSheet.absoluteFill}
+          experimentalBlurMethod={
+            Platform.OS === 'android' ? 'dimezisBlurView' : undefined
+          }
         />
       )}
 

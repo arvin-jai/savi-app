@@ -29,7 +29,7 @@ import {
 } from 'lucide-react-native';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
-import { BLUR_IS_CHEAP } from '@/components/glass/GlassCard';
+import { BLUR_IS_CHEAP, surfaceColor } from '@/components/glass/GlassCard';
 import { Text } from '@/components/ui/Text';
 import { HOME } from '@/lib/routes';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -67,9 +67,10 @@ export function GlassSidebar() {
         borderRadius: radius['2xl'],
         borderWidth: 1,
         borderColor: theme.glass.default.border,
-        backgroundColor: BLUR_IS_CHEAP
-          ? theme.glass.default.background
-          : theme.glass.default.fallback,
+        // A18. The sidebar is desktop-only, so Android never sees it — this
+        // goes through the same helper purely so there is one answer to
+        // "what colour is a glass surface" rather than four.
+        backgroundColor: surfaceColor(theme.glass.default, BLUR_IS_CHEAP),
         overflow: 'hidden',
         padding: space[4],
         gap: space[5],

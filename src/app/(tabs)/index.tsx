@@ -85,7 +85,11 @@ function Avatar({ name }: { name: string }) {
 export default function Dashboard() {
   const { data: profile } = useProfile();
   const { data: summary, isLoading: summaryLoading } = useFinancialSummary();
-  const { data: accounts, isLoading: accountsLoading } = useAccounts();
+  const {
+    data: accounts,
+    isLoading: accountsLoading,
+    isFetching: accountsFetching,
+  } = useAccounts();
   const { data: bills = [] } = useBills();
   const { insight } = useInsight();
   // Materialise any payday that has come due (idempotent, see the hook).
@@ -108,12 +112,23 @@ export default function Dashboard() {
    * A brand-new user has nothing to dashboard. Send them through P§34's
    * onboarding instead of showing a page of zeros — but only once accounts
    * have actually LOADED as empty, never while they're still in flight.
+   *
+   * `isLoading` alone is not "in flight". It is false whenever the cache holds
+   * *any* data, including the stale `[]` from before onboarding created an
+   * account. So finishing onboarding used to land on the dashboard, read that
+   * stale empty array while the invalidated refetch was still running, and
+   * bounce the user straight back into onboarding a second time — which is
+   * exactly what skipping the income and bills steps made easy to hit, because
+   * skipping gets you back here faster than the refetch resolves.
+   *
+   * `isFetching` covers the refetch case that `isLoading` does not.
    */
   useEffect(() => {
-    if (!accountsLoading && accounts && accounts.length === 0) {
+    if (accountsLoading || accountsFetching) return;
+    if (accounts && accounts.length === 0) {
       router.replace('/onboarding');
     }
-  }, [accountsLoading, accounts]);
+  }, [accountsLoading, accountsFetching, accounts]);
 
   const name = profile?.display_name?.trim();
 

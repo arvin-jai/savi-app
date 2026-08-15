@@ -1351,6 +1351,72 @@ money↔time connection (P§35) is what makes it a different product.
 >
 > **Not device-verified.** Web and database only.
 
+> ### ✅ M19 — first Android install, five reports, 2026-08-16
+>
+> The first report from the app actually installed on a phone. Five items, and four of them are
+> the same shape as M18's: **the reasoning was written down correctly and the implementation
+> quietly collapsed two things into one.**
+>
+> **1. "The transparency / glass effects are gone."** The one that matters. A6 made blur a
+> progressive enhancement and A4 made the opaque `fallback` the baseline, and in code those
+> became a single flag — `BLUR_IS_CHEAP ? background : fallback`. Android therefore rendered no
+> glass *at all*, on the platform the whole design targets first.
+>
+> The conflation is the bug. "Can this platform blur?" and "can this platform be transparent?"
+> are different questions, and only the first one has a cost: `backdrop-filter` has no RN
+> equivalent, alpha compositing is free. Split into `surfaceColor()`
+> ([GlassCard.tsx](../src/components/glass/GlassCard.tsx)) — every platform is translucent, and
+> only real blur stays gated behind `ANDROID_BLUR`, which is **off**, because M0 measured
+> `dimezisBlurView` costing frames and that has to be re-measured, not assumed. Recorded as
+> [A18](DESIGN-SYSTEM.md). Modals over a scrim (`GlassSheet`, `Celebration`) deliberately keep
+> the opaque composite — there is nothing behind them worth showing through.
+>
+> **2. Onboarding ran twice, most reliably when the last two steps were skipped.** The dashboard
+> sends anyone with zero accounts to onboarding, guarded by `!accountsLoading`. But `isLoading`
+> is false whenever the cache holds *any* data — including the stale `[]` from before onboarding
+> created an account. Finishing onboarding landed on the dashboard, read that stale array while
+> the invalidated refetch was still in flight, and bounced straight back. Skipping made it
+> reproducible because skipping gets you back to the dashboard faster than the refetch resolves.
+>
+> Fixed at both ends: the dashboard also guards on `isFetching`, and `finish()` awaits
+> `refetchQueries` before navigating. The second one removes the race rather than narrowing it.
+> **This is the third time a TanStack cache has disagreed with the database and shipped** (M18
+> twice, this once) — `isLoading` is not "in flight", and the CLAUDE.md cache section now says so.
+>
+> **3. Account creation demanded an emailed confirmation.** Not a code defect —
+> `supabase/config.toml` has `enable_confirmations = false`, but that governs the *local* stack
+> and the device build points at the hosted project, where the dashboard setting still had it on.
+> Left as a dashboard change on purpose: `supabase config push` would overwrite the whole hosted
+> auth block from a file that has never been reconciled with it, and 7ffac6c fixed hosted
+> password-reset redirects *in the dashboard*. Pushing would have undone that to fix this.
+>
+> **4. No way to see a password you are typing.** Added to `Input` as opt-out, not opt-in —
+> [A20](DESIGN-SYSTEM.md). The failure it prevents is a password typed blind at sign-up and then
+> rejected at sign-in, with no way to learn which of the two was the typo.
+>
+> **5. "Make accomplishments feel more rewarding."** §64 asked for this and there was nowhere to
+> put it: A15's toast is a *safety* affordance ("this can be undone"), deliberately quiet, and
+> quiet is wrong for "you cleared every bill you owe this month". `Celebration` is the second
+> surface, plus `expo-haptics` — a new native module, so this needs a fresh build either way.
+>
+> The scarcity rule shipped with it and is the load-bearing half ([A19](DESIGN-SYSTEM.md)):
+> milestones only — last bill cleared, goal crossing its target, final task ticked. Everything
+> else stays a toast. A celebration on every save is wallpaper within a day.
+>
+> Onboarding also gained the two bookend steps it was missing. It collected an account, an income
+> and some bills and never said what any of it bought — a form, on the screen where a money app
+> can least afford to read like one. `welcome` states what Savi is *for* before asking for
+> anything; `ready` reads back what was actually entered and names the questions Savi can now
+> answer. Skipping still works and the recap only claims what it has.
+>
+> **Verified:** typecheck, 393 JS tests, and the password reveal exercised on web (`type="password"`
+> cleared, label flipped to "Hide password"). `Celebration` renders from the kitchen sink.
+>
+> **Not device-verified — and four of these five are device-only questions.** Android translucency,
+> the haptics, and the celebration timing cannot be judged from `react-native-web`, which is
+> exactly the gap that produced item 1. The onboarding double-entry needs a real fresh sign-up
+> against the hosted project. A new build is required regardless: `expo-haptics` is native.
+
 ---
 
 ## v0.3 — M7 — Notifications

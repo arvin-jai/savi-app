@@ -14,6 +14,7 @@ import { GlassCard } from '@/components/glass/GlassCard';
 import { GlassSheet } from '@/components/glass/GlassSheet';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { Button } from '@/components/ui/Button';
+import { Celebration } from '@/components/ui/Celebration';
 import { Chip, ChipRow } from '@/components/ui/controls';
 import { EmptyState, Skeleton, StatusPill, Toast } from '@/components/ui/feedback';
 import { Input } from '@/components/ui/Input';
@@ -26,6 +27,7 @@ import {
 } from '@/features/calendar/api';
 import type { Task, TaskPriority } from '@/lib/database.types';
 import { dueLabel, todayISO } from '@/lib/dates';
+import { hapticError, hapticStep } from '@/lib/haptics';
 import { useTheme } from '@/theme/ThemeProvider';
 import { a11y, layout, radius, space } from '@/theme/tokens';
 import { useBreakpoint, useScrollBottomInset } from '@/theme/useBreakpoint';
@@ -53,9 +55,32 @@ export default function Tasks() {
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<Task | null>(null);
+  const [clearedList, setClearedList] = useState(false);
 
   const open = tasks.filter((t) => t.status === 'todo');
   const done = tasks.filter((t) => t.status === 'done');
+
+  /**
+   * Ticking a task off gets a haptic and nothing more. Per Celebration.tsx's
+   * scarcity rule this happens several times a day, so the reward is the one
+   * that costs no screen and no attention — clearing the *last* one gets the
+   * card, because an empty to-do list is the thing that doesn't happen daily.
+   */
+  function toggleTask(t: Task) {
+    const completing = t.status === 'todo';
+    const wasLastOpen = completing && open.length === 1;
+
+    toggle.mutate(t, {
+      onSuccess: () => {
+        if (wasLastOpen) setClearedList(true);
+        else if (completing) hapticStep();
+      },
+      onError: () => {
+        hapticError();
+        setToast('Could not update that task');
+      },
+    });
+  }
 
   async function save() {
     setError(null);
@@ -109,7 +134,7 @@ export default function Tasks() {
                 <TaskRow
                   key={t.id}
                   task={t}
-                  onToggle={() => toggle.mutate(t)}
+                  onToggle={() => toggleTask(t)}
                   onDelete={() => setConfirming(t)}
                 />
               ))}
@@ -125,7 +150,7 @@ export default function Tasks() {
                 <TaskRow
                   key={t.id}
                   task={t}
-                  onToggle={() => toggle.mutate(t)}
+                  onToggle={() => toggleTask(t)}
                   onDelete={() => setConfirming(t)}
                 />
               ))}
@@ -222,6 +247,14 @@ export default function Tasks() {
       </GlassSheet>
 
       <Toast visible={!!toast} message={toast ?? ''} onDismiss={() => setToast(null)} />
+
+      <Celebration
+        visible={clearedList}
+        title="Nothing left to do ✨"
+        body="Your whole list is clear."
+        tone="info"
+        onDismiss={() => setClearedList(false)}
+      />
     </View>
   );
 }

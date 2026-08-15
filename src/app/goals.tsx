@@ -17,6 +17,7 @@ import { GlassCard } from '@/components/glass/GlassCard';
 import { GlassSheet } from '@/components/glass/GlassSheet';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { Button } from '@/components/ui/Button';
+import { Celebration } from '@/components/ui/Celebration';
 import { EmptyState, Skeleton, StatusPill, Toast } from '@/components/ui/feedback';
 import { Input, MoneyInput } from '@/components/ui/Input';
 import { ProgressBar } from '@/components/ui/ProgressBar';
@@ -36,6 +37,7 @@ import {
   recommendedMonthlyMinor,
 } from '@/features/goals/goals';
 import type { FinancialGoal } from '@/lib/database.types';
+import { hapticError, hapticSuccess } from '@/lib/haptics';
 import { formatMoney, parseMoney } from '@/lib/money';
 import { layout, space } from '@/theme/tokens';
 import { useBreakpoint, useScrollBottomInset } from '@/theme/useBreakpoint';
@@ -60,6 +62,7 @@ export default function GoalsScreen() {
 
   const [confirmDelete, setConfirmDelete] = useState<FinancialGoal | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [reached, setReached] = useState<string | null>(null);
 
   function createGoal() {
     const targetMinor = parseMoney(target);
@@ -91,15 +94,32 @@ export default function GoalsScreen() {
     const amountMinor = parseMoney(contribution);
     if (amountMinor === null || amountMinor === 0) return setToast('Enter an amount');
 
+    const goal = contributing;
+    // Crossing the line, not sitting on it: a contribution to an already-reached
+    // goal should not re-fire the celebration every time.
+    const crossesTarget =
+      goal.saved_minor < goal.target_minor &&
+      goal.saved_minor + amountMinor >= goal.target_minor;
+
     addTo.mutate(
-      { goal: contributing, amountMinor },
+      { goal, amountMinor },
       {
         onSuccess: () => {
           setContributing(null);
           setContribution('');
-          setToast('Progress updated');
+          if (crossesTarget) {
+            // A goal reaching its target is the milestone; every other
+            // contribution is a toast. See Celebration.tsx's scarcity rule.
+            setReached(goal.name);
+          } else {
+            hapticSuccess();
+            setToast('Progress updated');
+          }
         },
-        onError: () => setToast('Could not update that goal'),
+        onError: () => {
+          hapticError();
+          setToast('Could not update that goal');
+        },
       }
     );
   }
@@ -229,6 +249,13 @@ export default function GoalsScreen() {
       </GlassSheet>
 
       <Toast visible={!!toast} message={toast ?? ''} onDismiss={() => setToast(null)} />
+
+      <Celebration
+        visible={!!reached}
+        title="Goal reached 🎉"
+        body={reached ? `You saved everything you set out to for ${reached}.` : undefined}
+        onDismiss={() => setReached(null)}
+      />
     </View>
   );
 }

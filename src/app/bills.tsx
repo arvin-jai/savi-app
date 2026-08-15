@@ -14,6 +14,7 @@ import { GlassCard } from '@/components/glass/GlassCard';
 import { GlassSheet } from '@/components/glass/GlassSheet';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { Button } from '@/components/ui/Button';
+import { Celebration } from '@/components/ui/Celebration';
 import { Chip, ChipRow } from '@/components/ui/controls';
 import { EmptyState, Skeleton, Toast } from '@/components/ui/feedback';
 import { Input, MoneyInput } from '@/components/ui/Input';
@@ -29,6 +30,7 @@ import {
   type BillWithStatus,
 } from '@/features/bills/api';
 import { useCategories } from '@/features/transactions/api';
+import { hapticError, hapticSuccess } from '@/lib/haptics';
 import { formatMoney, parseMoney } from '@/lib/money';
 import { useTheme } from '@/theme/ThemeProvider';
 import { layout, space, type CategoryName } from '@/theme/tokens';
@@ -71,15 +73,22 @@ export default function Bills() {
   const [toast, setToast] = useState<{ message: string; undo?: () => void } | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<BillWithStatus | null>(null);
+  const [cleared, setCleared] = useState<string | null>(null);
 
-  const unpaidTotal = bills
-    .filter((b) => b.status !== 'paid')
-    .reduce((sum, b) => sum + b.amount_minor, 0);
+  const unpaid = bills.filter((b) => b.status !== 'paid');
+  const unpaidTotal = unpaid.reduce((sum, b) => sum + b.amount_minor, 0);
 
   async function handleMarkPaid(bill: BillWithStatus) {
     setBusyId(bill.id);
+    // Read before the mutation: afterwards the list has already been
+    // invalidated, and "was this the last one?" is a question about the state
+    // the user was looking at when they tapped.
+    const wasLastUnpaid = unpaid.length === 1 && unpaid[0].id === bill.id;
+
     try {
       const payment = await markPaid.mutateAsync(bill);
+      hapticSuccess();
+
       // D§59: no dialog, but always an undo. That pairing is what makes the
       // missing confirmation safe rather than reckless.
       setToast({
@@ -89,7 +98,19 @@ export default function Bills() {
           setToast(null);
         },
       });
+
+      /**
+       * The milestone, per Celebration.tsx's scarcity rule: clearing the last
+       * bill you owe is a different event from paying one of seven, and only
+       * the first is worth taking the screen for. The undo toast still runs
+       * underneath — the celebration adds to it rather than replacing it, so
+       * nothing about taking the action back changes.
+       */
+      if (wasLastUnpaid) {
+        setCleared(`${formatMoney(bill.amount_minor)} was the last of it.`);
+      }
     } catch (e) {
+      hapticError();
       setToast({ message: e instanceof Error ? e.message : 'Could not mark that as paid' });
     } finally {
       setBusyId(null);
@@ -347,6 +368,13 @@ export default function Bills() {
         actionLabel={toast?.undo ? 'Undo' : undefined}
         onAction={toast?.undo}
         onDismiss={() => setToast(null)}
+      />
+
+      <Celebration
+        visible={!!cleared}
+        title="You're all paid up 🎉"
+        body={cleared ?? undefined}
+        onDismiss={() => setCleared(null)}
       />
     </View>
   );

@@ -42,9 +42,51 @@ const PADDING: Record<PaddingName, number> = {
  * Whether real backdrop blur is available and affordable on this platform.
  * Web composites it on the GPU cheaply; iOS has a native implementation.
  * Android is gated behind an explicit opt-in even when requested — see
- * `allowAndroidBlur`.
+ * `allowAndroidBlur` and `ANDROID_BLUR`.
  */
 export const BLUR_IS_CHEAP = Platform.OS === 'web' || Platform.OS === 'ios';
+
+/**
+ * Android's opt-in for REAL blur on the four A6 surfaces (nav, sheet, sidebar,
+ * dashboard hero). Off, because M0 measured `dimezisBlurView` and it costs
+ * frames — flipping this to `true` is a one-line experiment, but it is one that
+ * has to be re-measured on a device before it ships, not assumed.
+ *
+ * Note this is a *separate* question from whether Android draws glass at all.
+ * See `surfaceColor` — Android has translucency either way.
+ */
+export const ANDROID_BLUR = false;
+
+/**
+ * The background colour for a glass level, given whether real blur is running
+ * behind it.
+ *
+ * **A4 revisited (A18).** A4 made the opaque `fallback` the surface anywhere
+ * blur was unavailable, which on Android meant *every* surface. That was one
+ * conflation too many: "can this platform blur?" and "can this platform be
+ * transparent?" are different questions, and only the first one has a cost.
+ * `backdrop-filter` is what Android lacks; alpha compositing it does for free.
+ *
+ * The symptom was that Android shipped with no glass at all — flat opaque
+ * panels on an ambient background nobody could see, which is not the design in
+ * a cheaper form, it is a different design. So Android now takes the translucent
+ * value like everyone else, and only the blur stays gated.
+ *
+ * The `fallback` values are unchanged and still load-bearing: they are the exact
+ * composite of `background` over the page, which makes them the contrast
+ * reference for text on glass (`theme.glassFallback`). The web audit gate
+ * composites the real stack anyway, so it measures this rather than assuming it.
+ */
+export function surfaceColor(
+  level: { background: string; fallback: string },
+  blurred: boolean
+): string {
+  if (blurred) return level.background;
+  // Android: no blur, but the ambient orbs and the content behind still show
+  // through, which is the part the user actually reads as "glass".
+  if (Platform.OS === 'android') return level.background;
+  return level.fallback;
+}
 
 export type GlassCardProps = {
   children?: ReactNode;
@@ -95,7 +137,8 @@ export function GlassCard({
   const theme = useTheme();
   const level = theme.glass[variant];
 
-  const useRealBlur = blur && (BLUR_IS_CHEAP || allowAndroidBlur);
+  const androidBlur = Platform.OS === 'android' && (allowAndroidBlur || ANDROID_BLUR);
+  const useRealBlur = blur && (BLUR_IS_CHEAP || androidBlur);
 
   const shape: ViewStyle = {
     borderRadius: radiusTokens[radius],
@@ -105,10 +148,9 @@ export function GlassCard({
     overflow: 'hidden',
   };
 
-  const surface: ViewStyle = useRealBlur
-    ? { backgroundColor: level.background }
-    : // A4: the solid composite. Not a degraded state — the baseline.
-      { backgroundColor: level.fallback };
+  // A18: translucent wherever the platform can composite alpha (everywhere),
+  // opaque only where the design needs the known composite. See surfaceColor.
+  const surface: ViewStyle = { backgroundColor: surfaceColor(level, useRealBlur) };
 
   // A7: `elevation` is the untinted Android fallback, so a tinted glow has to
   // take the `boxShadow` path on every platform — including Android, where M0
@@ -127,7 +169,7 @@ export function GlassCard({
           tint={theme.isDark ? 'dark' : 'light'}
           style={StyleSheet.absoluteFill}
           // Android needs this to do anything at all; it is the expensive path.
-          experimentalBlurMethod={allowAndroidBlur ? 'dimezisBlurView' : undefined}
+          experimentalBlurMethod={androidBlur ? 'dimezisBlurView' : undefined}
         />
       )}
       {children}

@@ -39,6 +39,9 @@
 > | A15 | **Undefined states specified** — focus, layering, toast, easing, offline, overflow | §44 | [Review gaps](DESIGN-REVIEW.md#specification-gaps) |
 > | A16 | Colourblindness check run: **no nine-colour palette can pass**; the dot is never load-bearing | §7 | [BUILD-PLAN risk 12](BUILD-PLAN.md#part-7--risk-register) |
 > | A17 | **Bottom nav is icon-only** — a deliberate §44 deviation, with the mitigations that replace the label | §27, §44 | Hero Focus design handoff |
+> | A18 | **Android is translucent, just not blurred** — A6's gate narrowed to blur alone | §8, §9, §53 | Device report, v0.7.1 |
+> | A19 | **Celebration surface** added alongside the toast, with a scarcity rule | §64, §59 | Device report, v0.7.1 |
+> | A20 | **Password fields carry a reveal toggle** by default | §36 | Device report, v0.7.1 |
 >
 > Every ⚠️ callout from v1.0 has been resolved. Amendments are marked inline where they apply.
 
@@ -847,6 +850,19 @@ Focus state:
 | Border | `#8B5CF6` |
 | Glow | `rgba(139,92,246,0.15)` |
 
+### Amendment A20 — password fields reveal by default
+
+Any `Input` with `secureTextEntry` gets an eye toggle on its right edge, 44px wide and full
+field height. It is opt-**out** (`revealToggle={false}`), not opt-in, because the failure it
+prevents is the expensive one: a password typed blind at sign-up and then not accepted at
+sign-in, with no way to find out which of the two was the typo. Sign-up, sign-in and both fields
+on password reset all carry it.
+
+The trade is shoulder-surfing, and it is small — the field starts masked, revealing takes a
+deliberate tap on the user's own device, and nothing persists the revealed state. Somewhere that
+trade goes the other way (a PIN pad, a shared kiosk) passes `revealToggle={false}`. Nothing in
+Savi does today.
+
 ---
 
 ## 6.5 Input Design (§37)
@@ -1631,6 +1647,36 @@ Or:
 
 Avoid gamifying everything. The feeling should be **quiet encouragement**, not a video game.
 
+### Amendment A19 — the celebration surface, and the rule that keeps it rare
+
+§64 asked for positive feedback and the implementation had nowhere to put it: A15's toast is a
+*safety* affordance ("this can be taken back"), deliberately quiet, and quiet is the wrong
+register for "you just cleared every bill you owe this month". Those are two messages and they
+need two surfaces.
+
+`Celebration` is the second one — a centred card with an animated check burst, dismissed by a
+tap or by its own 2.6s timer, plus a haptic. The toast keeps its job and runs underneath it, so
+nothing about undo changes.
+
+**The scarcity rule is the whole of §64's "avoid gamifying everything", made enforceable.** A
+celebration that fires on every save is wallpaper within a day, and then the one that matters
+lands on a user who has learned to dismiss it. So it fires on milestones only:
+
+| Event | Surface |
+| --- | --- |
+| Last unpaid bill of the month cleared | Celebration |
+| A goal crossing its target (crossing, not sitting on it) | Celebration |
+| The final open task ticked off | Celebration |
+| Finishing onboarding | The `ready` step, which is the same idea inline |
+| Any other bill, goal contribution or task | Toast, plus a haptic |
+
+If a proposed call site cannot be described as *a thing that does not happen most days*, it is a
+toast.
+
+Haptics are deliberately **not** suppressed under reduced motion. They are a separate OS setting
+which the platform already honours, and suppressing them would remove the one channel still
+working for a user who has turned motion off.
+
 ---
 
 # Part 9 — Accessibility & Themes
@@ -1667,6 +1713,41 @@ Also honor, on top of reduced motion:
 
 - `prefers-reduced-transparency` (web) → render the fallback, no blur
 - Android high-contrast → render the fallback
+
+### Amendment A18 — Android is translucent, it just isn't blurred
+
+A6 made blur a progressive enhancement and A4 made the opaque `fallback` the baseline. In
+implementation those two collapsed into one flag, and the result was that **Android — the
+primary platform — shipped with no glass on it at all**: flat opaque panels on an ambient
+background nobody could see. That is not the design rendered cheaply, it is a different design,
+and it was reported from a device as "the transparency is gone".
+
+The conflation is the bug. *Can this platform blur?* and *can this platform be transparent?* are
+different questions, and only the first has a cost. `backdrop-filter` has no React Native
+equivalent; alpha compositing is free everywhere.
+
+So the rule splits in two:
+
+| Question | Answer |
+| --- | --- |
+| **Is the surface translucent?** | Yes, on every platform. `glass[level].background` is the surface colour. |
+| **Is there real blur behind it?** | Web and iOS yes. Android only behind `ANDROID_BLUR`, which is **off** — `dimezisBlurView` costs frames and that has to be re-measured on a device before it ships. |
+
+`fallback` is unchanged and still load-bearing: it is the exact composite of `background` over
+the page, which is what makes it the contrast reference under A4. It is now the surface colour
+only where the design wants the known composite — modals over a scrim (`GlassSheet`,
+`Celebration`), where there is nothing behind worth showing through anyway.
+
+**One exception, and it is about content, not platform.** The bottom nav floats *over* scrolling
+content, and `subtle` is 40–45% alpha — without blur to absorb it, a list scrolls visibly through
+the tab icons and reads as broken rather than as glass. So an unblurred nav steps up to
+`elevated` (75%): still translucent, the ambient background still shows through, but what is
+behind stays a suggestion. Every other glass surface has the static page behind it, not moving
+content, and needs no such step.
+
+One consequence worth stating: over an ambient orb the effective background is no longer exactly
+`fallback`. The orbs are 5–15% opacity so the shift is small, and the web audit gate composites
+the real background stack rather than assuming it — so this is measured, not hoped for.
 
 ### Amendment A15 — states the spec left undefined
 

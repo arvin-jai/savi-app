@@ -85,9 +85,10 @@ charts* means they need a reason to exist beyond looking good. The budget screen
 | — | M16 Recurring income · delete | ✅ From real use: income generates; bills & accounts deletable |
 | — | M17 Hero Focus redesign | ✅ All five screens rebuilt; nav icon-only per [A17](DESIGN-SYSTEM.md) |
 | — | M18 Account lifecycle → schedules | ✅ From real use: deleting/archiving an account now reaches its paydays |
+| — | M19 First Android install — 5 reports | ⚠️ Built, **not device-verified**, and 4 of the 5 are device-only questions |
 | v1.0 | Public MVP | ⛔ **Blocked** — see [RELEASE.md](RELEASE.md) |
 
-**Totals:** 385 unit tests · 121 DB checks across eight suites · 15 migrations · 19 tables
+**Totals:** 393 unit tests · 121 DB checks across eight suites · 15 migrations · 19 tables
 (all with RLS, 70 policies) · 17 SQL functions · 2 Edge Functions. Typecheck and `deno check`
 clean.
 
@@ -252,6 +253,23 @@ while web was fine.
   the largest single unknown in the codebase.**
 - **No device pass since v0.3.** v0.4–v0.7 plus M14 ran on web only, and that stretch added a
   `KeyboardAvoidingView`, a pinned composer, and six screens.
+- **All of M19 is unverified on a device, and most of it can only be verified there.** Android
+  translucency ([A18](DESIGN-SYSTEM.md)), the haptics, and whether `Celebration`'s 2.6s hold and
+  burst read as rewarding rather than as an interruption are all things `react-native-web` will
+  happily lie about — which is precisely how the Android glass shipped missing in the first
+  place. The onboarding double-entry fix needs a genuinely fresh sign-up against the hosted
+  project, not a reload. **A new build is required regardless: `expo-haptics` is a native
+  module.**
+- **Real Android blur is still unmeasured.** `ANDROID_BLUR` in
+  [GlassCard.tsx](../src/components/glass/GlassCard.tsx) is a one-line flip to `true` that turns
+  on `dimezisBlurView` for the nav and any card asking for blur. It is off because M0 measured
+  blur costing frames on Android and nothing has re-measured it since. Translucency — which is
+  what the "glass is gone" report was actually about — does not depend on it.
+- **Hosted email confirmation is a dashboard setting, not a repo setting.**
+  `supabase/config.toml` says `enable_confirmations = false`, and that governs the *local* stack
+  only. Do not "fix" the hosted project with `supabase config push`: it overwrites the whole
+  hosted auth block, and 7ffac6c fixed hosted password-reset redirects in the dashboard. Change
+  the toggle in the dashboard.
 - **TalkBack (M6).** Dynamic type at 200% is now measured; a screen-reader pass still needs a
   device, and layout-under-scaled-text is not the same thing.
 - **R5 frame rate on mid-range hardware (M0).** The blur verdict rests on an emulator's

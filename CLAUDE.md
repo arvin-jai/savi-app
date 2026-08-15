@@ -74,7 +74,7 @@ answers "where did it go" with a waterfall.
 npm run verify                                 # typecheck + tests — the quick gate
 npm run typecheck                              # tsc --noEmit
 npx deno check supabase/functions/*/index.ts   # the 2 files tsc cannot see (Deno globals)
-npm test                                        # jest, 385 tests
+npm test                                        # jest, 393 tests
 npx jest src/features/bills                     # one directory
 npx jest -t "clamps the 31st"                   # one test by name
 npm run db:test:all                             # all 8 SQL suites (~121 checks), needs Supabase up
@@ -158,8 +158,14 @@ TanStack Query caches are the app's real source of truth for what the user *sees
 invalidates only the obvious ones leaves the screen showing rows the database no longer has.
 That shipped once — deleting an account left its salary drawn on the calendar (M18).
 
-Two rules follow, and neither is enforced by a test:
+Three rules follow, and none is enforced by a test:
 
+- **`isLoading` is not "in flight".** It is false whenever the cache holds *any* data, including
+  data you just invalidated and are about to replace. A redirect or an empty state gated on
+  `!isLoading` fires against the stale value while the refetch is still running. Gate on
+  `isFetching` as well — and where the consequence is navigation, `await refetchQueries` before
+  you navigate rather than racing it. This shipped as onboarding running twice (M19): finishing
+  it landed on a dashboard that read the pre-onboarding `[]` and bounced the user straight back.
 - **When you add a cascading FK, grep for every query key that reads the child table** and add
   it to the parent mutation's `onSuccess`.
 - **The same table is read under more than one key**, in different shapes.

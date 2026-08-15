@@ -20,6 +20,7 @@ import { InsightCard } from '@/components/domain/InsightCard';
 import { GlassCard } from '@/components/glass/GlassCard';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { Button, Fab } from '@/components/ui/Button';
+import { Celebration } from '@/components/ui/Celebration';
 import { Badge, Divider, EmptyState, Skeleton, StatusPill, Toast } from '@/components/ui/feedback';
 import { Input, MoneyInput } from '@/components/ui/Input';
 import { Text } from '@/components/ui/Text';
@@ -69,6 +70,7 @@ export default function KitchenSink() {
   const theme = useTheme();
   const [amount, setAmount] = useState('');
   const [toastVisible, setToastVisible] = useState(false);
+  const [celebrating, setCelebrating] = useState(false);
 
   return (
     <View style={{ flex: 1 }}>
@@ -242,6 +244,12 @@ export default function KitchenSink() {
             <Input label="Description" placeholder="What was it?" hint="Savi will guess the category" />
             <Input label="With error" placeholder="Required" error="Enter a description" />
             <Input label="Disabled" placeholder="Not editable" disabled />
+            <Input
+              label="Password"
+              placeholder="At least 6 characters"
+              secureTextEntry
+              hint="The eye reveals it — every secureTextEntry field gets one by default"
+            />
             <MoneyInput value={amount} onChangeText={setAmount} />
           </Section>
 
@@ -273,6 +281,18 @@ export default function KitchenSink() {
             />
 
             <Button label="Show toast" variant="secondary" onPress={() => setToastVisible(true)} />
+
+            <Divider />
+
+            <Text variant="micro" tone="secondary">
+              The milestone surface, not a nicer toast — see Celebration.tsx on when each is
+              the right one.
+            </Text>
+            <Button
+              label="Show celebration"
+              variant="secondary"
+              onPress={() => setCelebrating(true)}
+            />
           </Section>
 
           {/* ── FAB ──────────────────────────────────────────────────── */}
@@ -291,6 +311,13 @@ export default function KitchenSink() {
           actionLabel="Undo"
           onAction={() => setToastVisible(false)}
           onDismiss={() => setToastVisible(false)}
+        />
+
+        <Celebration
+          visible={celebrating}
+          title="You're all paid up 🎉"
+          body="₱1,450.00 was the last of it."
+          onDismiss={() => setCelebrating(false)}
         />
       </SafeAreaView>
     </View>
