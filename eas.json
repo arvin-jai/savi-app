@@ -11,7 +11,8 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_SUPABASE_URL": "http://10.0.2.2:54321"
+        "EXPO_PUBLIC_SUPABASE_URL": "http://10.0.2.2:54321",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
       }
     },
     "preview": {
@@ -19,14 +20,22 @@
       "android": {
         "buildType": "apk"
       },
-      "channel": "preview"
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://sednspswaeevjlfjwttu.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlZG5zcHN3YWVldmpsZmp3dHR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4MjE3MzQsImV4cCI6MjEwMjM5NzczNH0.tZaMdEq35ouOdGM2O-NCuurH2lSNdOOfXPS7djyTo1g"
+      }
     },
     "production": {
       "channel": "production",
       "android": {
         "buildType": "app-bundle"
       },
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://sednspswaeevjlfjwttu.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlZG5zcHN3YWVldmpsZmp3dHR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4MjE3MzQsImV4cCI6MjEwMjM5NzczNH0.tZaMdEq35ouOdGM2O-NCuurH2lSNdOOfXPS7djyTo1g"
+      }
     }
   },
   "submit": {
