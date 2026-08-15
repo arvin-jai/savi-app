@@ -1,9 +1,68 @@
+/**
+ * Web-only global styles.
+ *
+ * Everything else in Savi is styled through the token system; this file exists
+ * for the two things CSS can express and React Native styles cannot.
+ */
+
 :root {
   --font-display:
-    Spline Sans, Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji,
+    Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji,
     Segoe UI Symbol, Noto Color Emoji;
   --font-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
-  --font-rounded: 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif;
-  --font-serif: Georgia, 'Times New Roman', serif;
+
+  /* brand-600 — the focus colour from theme/tokens.ts. Duplicated here because
+     CSS cannot import from TS; keep the two in sync. */
+  --savi-focus: #7c3aed;
+}
+
+/**
+ * Focus rings (D§44, A15).
+ *
+ * `:focus-visible`, not React Native's `focused` style-callback flag. Two
+ * reasons: the flag was not firing at all on RN Web Pressables (every control
+ * measured as having no outline), and more importantly the browser's own
+ * heuristic is the one that distinguishes keyboard focus from a mouse click.
+ * A ring that appears when you click a button is noise; this shows it only
+ * when someone is actually navigating by keyboard.
+ */
+:focus-visible {
+  outline: 2px solid var(--savi-focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Never remove the ring without replacing it. */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/**
+ * Reduced transparency (A4).
+ *
+ * The glass fallback colours already render as solid surfaces; this catches
+ * any backdrop-filter that reaches the browser — the bottom nav and sidebar
+ * use one on web — so the surface becomes genuinely opaque rather than merely
+ * less blurred.
+ */
+@media (prefers-reduced-transparency: reduce) {
+  * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/**
+ * Reduced motion. The JS hook in theme/useReducedMotion.ts handles the
+ * Animated values; this catches CSS transitions that RN Web emits itself.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

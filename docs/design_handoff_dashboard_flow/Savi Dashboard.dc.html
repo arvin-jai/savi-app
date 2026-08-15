@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#e9e7f2;font-family:Inter,system-ui,sans-serif}
+  a{color:#7C3AED;text-decoration:none}
+  a:hover{color:#6D28D9}
+  .dv-turn{padding:48px 52px 40px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}
+  .dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+  .dv-tid{font:700 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}
+  .dv-tname{font:600 14px/1.2 Inter,sans-serif;color:#1a1a1a}
+  .dv-tsub{font:400 13px/1.5 Inter,sans-serif;color:rgba(0,0,0,.5);max-width:760px;margin:0 0 28px}
+  .dv-opts{display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start}
+  .dv-opt{flex:none;display:flex;flex-direction:column;gap:12px;scroll-margin-top:16px}
+  .dv-oid{font:700 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}
+  .dv-olabel{display:flex;align-items:baseline;gap:9px;font:400 12px/1.4 Inter,sans-serif;color:rgba(0,0,0,.55);max-width:390px}
+  .dv-olabel b{color:rgba(0,0,0,.8);font-weight:600}
+  .dv-opt:target .dv-oid{background:#7C3AED;color:#fff}
+  .dv-next{margin:30px 0 0;font:13px/1.6 Inter,sans-serif;color:rgba(0,0,0,.5)}
+  /* phone shell */
+  .ph{width:390px;padding:11px;background:linear-gradient(150deg,#181822,#05050a);border-radius:54px;box-shadow:0 2px 4px rgba(0,0,0,.4),0 30px 60px -20px rgba(40,30,80,.5)}
+  .scr{position:relative;width:368px;height:800px;border-radius:44px;overflow:hidden}
+  .sb{height:52px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 8px;font:600 14px Inter;flex:none}
+  .sb .bars{display:flex;gap:5px;align-items:center}
+  .body{position:absolute;inset:52px 0 0;overflow:hidden;padding:4px 18px 0}
+  .nav{position:absolute;left:16px;right:16px;bottom:14px;height:64px;border-radius:26px;display:flex;padding:0 4px;z-index:5}
+  .nav .it{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:600 10.5px Inter}
+  .fab{position:absolute;right:22px;bottom:92px;width:56px;height:56px;border-radius:28px;background:#7C3AED;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(124,58,237,.45);z-index:6}
+  .fab svg{stroke:#fff}
+  .lbl{font:600 12px Inter;letter-spacing:.06em;text-transform:uppercase}
+  .mono{font-variant-numeric:tabular-nums}
+</style>
+</helmet>
+
+<section class="dv-turn" id="t2">
+  <div class="dv-thd"><a class="dv-tid" href="#t2">2</a><span class="dv-tname">Full flow — <a class="dv-oid" href="#1b">1b</a>'s language, light &amp; dark</span></div>
+  <p class="dv-tsub">The five tabs built out in Hero Focus's voice: big display numbers, icon-only nav, brand-glow accents. Home carries the date header and progressive dots from your last round. Each screen shown in both themes.</p>
+  <div class="dv-opts">
+
+    <!-- ============ 2a — Home ============ -->
+    <div class="dv-opt" id="2a">
+      <div class="dv-olabel"><a class="dv-oid" href="#2a">2a</a><span><b>Home.</b></span></div>
+      <div style="display:flex;gap:20px">
+      <div class="ph"><div class="scr" style="background:radial-gradient(58% 40% at 10% 2%,rgba(139,92,246,.15),transparent 60%),radial-gradient(50% 32% at 98% 14%,rgba(6,182,212,.12),transparent 60%),#F6F7FB">
+        <div class="sb" style="color:#18181B"><span>9:41</span><span class="bars"><svg width="17" height="12" viewBox="0 0 17 12" fill="#18181B"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".35"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#18181B" stroke-width="1.6"><path d="M1 4.2C4.6 1 11.4 1 15 4.2M3.4 6.8c2.4-2 6.8-2 9.2 0M6 9.4c1.1-.9 2.9-.9 4 0"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#18181B" stroke-opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#18181B"/><rect x="22" y="4" width="1.6" height="4" rx="1" fill="#18181B" fill-opacity=".5"/></svg></span></div>
+        <div class="body">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 4px 18px">
+            <div><div style="font:600 14px Inter;color:#52525B">Good morning, Alex 👋</div><div style="font:400 12px Inter;color:rgba(0,0,0,.4);margin-top:3px">Friday, August 15</div></div>
+            <div style="width:36px;height:36px;border-radius:18px;background:linear-gradient(135deg,#A78BFA,#7C3AED);display:flex;align-items:center;justify-content:center;font:700 14px 'Plus Jakarta Sans';color:#fff">A</div>
+          </div>
+          <div style="background:rgba(255,255,255,.72);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.8);border-radius:28px;padding:24px 22px 0;box-shadow:0 8px 30px rgba(139,92,246,.15);overflow:hidden">
+            <div class="lbl" style="color:#7C3AED">Available money</div>
+            <div style="font:800 50px/1 'Plus Jakarta Sans';letter-spacing:-2.5px;color:#18181B;margin:12px 0 6px" class="mono">₱24,500</div>
+            <div style="font:400 13px Inter;color:#52525B;margin-bottom:6px">after ₱5,200 in upcoming bills · <span style="color:#065F46">+8% vs last week</span></div>
+            <svg width="100%" height="66" viewBox="0 0 300 66" preserveAspectRatio="none" style="display:block"><defs><linearGradient id="sl2a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8B5CF6" stop-opacity=".28"/><stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/></linearGradient></defs><path d="M0 48 30 44 60 50 90 38 120 42 150 30 180 34 210 22 240 28 270 16 300 20 V66 H0 Z" fill="url(#sl2a)"/><path d="M0 48 30 44 60 50 90 38 120 42 150 30 180 34 210 22 240 28 270 16 300 20" fill="none" stroke="#7C3AED" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div style="background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6);border-radius:20px;padding:16px;margin-top:14px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:10px"><span style="font:400 12px Inter;color:#52525B">This month</span><span style="font:600 12px Inter;color:#52525B">₱42,340 total</span></div>
+            <div style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px"><div style="flex:71;background:#10B981;border-radius:5px 0 0 5px"></div><div style="flex:29;background:#F97316;border-radius:0 5px 5px 0"></div></div>
+            <div style="display:flex;justify-content:space-between;margin-top:10px"><span style="font:500 13px Inter;color:#065F46">Income ₱30,000</span><span style="font:500 13px Inter;color:#9A3412">Spent ₱12,340</span></div>
+          </div>
+          <div style="margin:16px 4px 10px"><span class="lbl" style="color:#52525B">Bills this week</span></div>
+          <div style="display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -18px;padding:0 18px 4px;scrollbar-width:none">
+            <div style="scroll-snap-align:start;flex:none;width:150px;background:rgba(255,255,255,.55);border:1px solid rgba(245,158,11,.4);border-radius:16px;padding:14px"><div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:4px;background:#F59E0B"></span><span style="font:500 13px Inter;color:#18181B">Internet</span></div><div style="font:700 18px 'Plus Jakarta Sans';color:#18181B;margin-top:8px">₱1,699</div><div style="font:500 11px Inter;color:#92400E;margin-top:2px">Due tomorrow</div></div>
+            <div style="scroll-snap-align:start;flex:none;width:150px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:14px"><div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:4px;background:#F59E0B"></span><span style="font:500 13px Inter;color:#18181B">Electricity</span></div><div style="font:700 18px 'Plus Jakarta Sans';color:#18181B;margin-top:8px">₱2,150</div><div style="font:400 11px Inter;color:#52525B;margin-top:2px">Thu · in 4 days</div></div>
+            <div style="scroll-snap-align:start;flex:none;width:150px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:14px"><div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:4px;background:#F59E0B"></span><span style="font:500 13px Inter;color:#18181B">Water</span></div><div style="font:700 18px 'Plus Jakarta Sans';color:#18181B;margin-top:8px">₱1,351</div><div style="font:400 11px Inter;color:#52525B;margin-top:2px">Sat · in 6 days</div></div>
+            <div style="scroll-snap-align:start;flex:none;width:150px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:14px"><div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:4px;background:#F59E0B"></span><span style="font:500 13px Inter;color:#18181B">Streaming</span></div><div style="font:700 18px 'Plus Jakarta Sans';color:#18181B;margin-top:8px">₱549</div><div style="font:400 11px Inter;color:#52525B;margin-top:2px">Sun · in 7 days</div></div>
+          </div>
+          <div style="display:flex;gap:6px;justify-content:center;margin-top:10px"><span style="width:6px;height:6px;border-radius:3px;background:#7C3AED"></span><span style="width:6px;height:6px;border-radius:3px;background:rgba(0,0,0,.15)"></span><span style="width:6px;height:6px;border-radius:3px;background:rgba(0,0,0,.15)"></span><span style="width:6px;height:6px;border-radius:3px;background:rgba(0,0,0,.15)"></span></div>
+          <div style="background:#EBE7F9;border:1px solid rgba(255,255,255,.6);border-radius:22px;padding:18px;margin-top:14px;box-shadow:0 8px 30px rgba(139,92,246,.15)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="display:flex;gap:3px"><span style="width:6px;height:6px;border-radius:3px;background:#A78BFA"></span><span style="width:6px;height:6px;border-radius:3px;background:#06B6D4;opacity:.7"></span></span><span style="font:600 12px Inter;letter-spacing:.05em;text-transform:uppercase;color:#7C3AED">Savi Insight</span></div>
+            <div style="font:500 15px/1.4 Inter;color:#18181B">Food spending is 24% up. Trimming delivery could save you ₱1,200 this month.</div>
+            <div style="font:600 13px Inter;color:#7C3AED;margin-top:12px">View spending →</div>
+          </div>
+        </div>
+        <div class="fab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+        <div class="nav" style="background:rgba(255,255,255,.6);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 30px rgba(31,38,135,.08)">
+          <div class="it" style="color:#7C3AED"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 3v4M16 3v4"/></svg></div>
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18"/><circle cx="17" cy="14.5" r="1.3" fill="currentColor" stroke="none"/></svg></div>
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l1.7 4.4L18 9l-4.3 1.6L12 15l-1.7-4.4L6 9l4.3-1.6z"/></svg></div>
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+        </div>
+      </div></div>
+      <div class="ph"><div class="scr" style="background:radial-gradient(60% 40% at 8% 0%,rgba(139,92,246,.22),transparent 58%),radial-gradient(52% 34% at 100% 12%,rgba(6,182,212,.16),transparent 60%),radial-gradient(70% 45% at 30% 100%,rgba(139,92,246,.12),transparent 60%),#0B0B12">
+        <div class="sb" style="color:#F8FAFC"><span>9:41</span><span class="bars"><svg width="17" height="12" viewBox="0 0 17 12" fill="#F8FAFC"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".35"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#F8FAFC" stroke-width="1.6"><path d="M1 4.2C4.6 1 11.4 1 15 4.2M3.4 6.8c2.4-2 6.8-2 9.2 0M6 9.4c1.1-.9 2.9-.9 4 0"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#F8FAFC" stroke-opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#F8FAFC"/><rect x="22" y="4" width="1.6" height="4" rx="1" fill="#F8FAFC" fill-opacity=".5"/></svg></span></div>
+        <div class="body">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 4px 18px">
+            <div><div style="font:600 14px Inter;color:#A1A1AA">Good morning, Alex 👋</div><div style="font:400 12px Inter;color:#71717A;margin-top:3px">Friday, August 15</div></div>
+            <div style="width:36px;height:36px;border-radius:18px;background:linear-gradient(135deg,#A78BFA,#7C3AED);display:flex;align-items:center;justify-content:center;font:700 14px 'Plus Jakarta Sans';color:#fff">A</div>
+          </div>
+          <div style="background:rgba(38,34,60,.55);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.1);border-radius:28px;padding:24px 22px 0;box-shadow:0 8px 30px rgba(139,92,246,.25);overflow:hidden">
+            <div class="lbl" style="color:#A78BFA">Available money</div>
+            <div style="font:800 50px/1 'Plus Jakarta Sans';letter-spacing:-2.5px;color:#F8FAFC;margin:12px 0 6px" class="mono">₱24,500</div>
+            <div style="font:400 13px Inter;color:#A1A1AA;margin-bottom:6px">after ₱5,200 in upcoming bills · <span style="color:#34D399">+8% vs last week</span></div>
+            <svg width="100%" height="66" viewBox="0 0 300 66" preserveAspectRatio="none" style="display:block"><defs><linearGradient id="sl2b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A78BFA" stop-opacity=".35"/><stop offset="1" stop-color="#A78BFA" stop-opacity="0"/></linearGradient></defs><path d="M0 48 30 44 60 50 90 38 120 42 150 30 180 34 210 22 240 28 270 16 300 20 V66 H0 Z" fill="url(#sl2b)"/><path d="M0 48 30 44 60 50 90 38 120 42 150 30 180 34 210 22 240 28 270 16 300 20" fill="none" stroke="#A78BFA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div style="background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:16px;margin-top:14px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:10px"><span style="font:400 12px Inter;color:#A1A1AA">This month</span><span style="font:600 12px Inter;color:#A1A1AA">₱42,340 total</span></div>
+            <div style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px"><div style="flex:71;background:#10B981;border-radius:5px 0 0 5px"></div><div style="flex:29;background:#F97316;border-radius:0 5px 5px 0"></div></div>
+            <div style="display:flex;justify-content:space-between;margin-top:10px"><span style="font:500 13px Inter;color:#34D399">Income ₱30,000</span><span style="font:500 13px Inter;color:#FB923C">Spent ₱12,340</span></div>
+          </div>
+          <div style="margin:16px 4px 10px"><span class="lbl" style="color:#A1A1AA">Bills this week</span></div>
+          <div style="display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -18px;padding:0 18px 4px;scrollbar-width:none">
+            <div style="scroll-snap-align:start;flex:none;width:150px;background:rgba(25,25,38,.5);border:1px solid rgba(251,191,36,.3);border-radius:16px;padding:14px"><div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:4px;background:#F59E0B"></span><span style="font:500 13px Inter;color:#F8FAFC">Internet</span></div><div style="font:700 18px 'Plus Jakarta Sans';color:#F8FAFC;margin-top:8px">₱1,699</div><div style="font:500 11px Inter;color:#FBBF24;margin-top:2px">Due tomorrow</div></div>
+            <div style="scroll-snap-align:start;flex:none;width:150px;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px"><div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:4px;background:#F59E0B"></span><span style="font:500 13px Inter;color:#F8FAFC">Electricity</span></div><div style="font:700 18px 'Plus Jakarta Sans';color:#F8FAFC;margin-top:8px">₱2,150</div><div style="font:400 11px Inter;color:#A1A1AA;margin-top:2px">Thu · in 4 days</div></div>
+            <div style="scroll-snap-align:start;flex:none;width:150px;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px"><div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:4px;background:#F59E0B"></span><span style="font:500 13px Inter;color:#F8FAFC">Water</span></div><div style="font:700 18px 'Plus Jakarta Sans';color:#F8FAFC;margin-top:8px">₱1,351</div><div style="font:400 11px Inter;color:#A1A1AA;margin-top:2px">Sat · in 6 days</div></div>
+            <div style="scroll-snap-align:start;flex:none;width:150px;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px"><div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:4px;background:#F59E0B"></span><span style="font:500 13px Inter;color:#F8FAFC">Streaming</span></div><div style="font:700 18px 'Plus Jakarta Sans';color:#F8FAFC;margin-top:8px">₱549</div><div style="font:400 11px Inter;color:#A1A1AA;margin-top:2px">Sun · in 7 days</div></div>
+          </div>
+          <div style="display:flex;gap:6px;justify-content:center;margin-top:10px"><span style="width:6px;height:6px;border-radius:3px;background:#A78BFA"></span><span style="width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.2)"></span><span style="width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.2)"></span><span style="width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.2)"></span></div>
+          <div style="background:#26223C;border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:18px;margin-top:14px;box-shadow:0 8px 30px rgba(139,92,246,.22)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="display:flex;gap:3px"><span style="width:6px;height:6px;border-radius:3px;background:#A78BFA"></span><span style="width:6px;height:6px;border-radius:3px;background:#06B6D4;opacity:.7"></span></span><span style="font:600 12px Inter;letter-spacing:.05em;text-transform:uppercase;color:#A78BFA">Savi Insight</span></div>
+            <div style="font:500 15px/1.4 Inter;color:#F8FAFC">Food spending is 24% up. Trimming delivery could save you ₱1,200 this month.</div>
+            <div style="font:600 13px Inter;color:#A78BFA;margin-top:12px">View spending →</div>
+          </div>
+        </div>
+        <div class="fab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+        <div class="nav" style="background:rgba(25,25,38,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 30px rgba(0,0,0,.35)">
+          <div class="it" style="color:#A78BFA"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 3v4M16 3v4"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18"/><circle cx="17" cy="14.5" r="1.3" fill="currentColor" stroke="none"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l1.7 4.4L18 9l-4.3 1.6L12 15l-1.7-4.4L6 9l4.3-1.6z"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+        </div>
+      </div></div>
+      </div>
+    </div>
+
+
+    <!-- ============ 2b — Calendar ============ -->
+    <div class="dv-opt" id="2b">
+      <div class="dv-olabel"><a class="dv-oid" href="#2b">2b</a><span><b>Calendar.</b> Week strip + agenda, colored dots per D§35 (never load-bearing alone — label always shown).</span></div>
+      <div style="display:flex;gap:20px">
+      <div class="ph"><div class="scr" style="background:radial-gradient(58% 40% at 10% 2%,rgba(139,92,246,.15),transparent 60%),radial-gradient(50% 32% at 98% 14%,rgba(6,182,212,.12),transparent 60%),#F6F7FB">
+        <div class="sb" style="color:#18181B"><span>9:41</span><span class="bars"><svg width="17" height="12" viewBox="0 0 17 12" fill="#18181B"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".35"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#18181B" stroke-width="1.6"><path d="M1 4.2C4.6 1 11.4 1 15 4.2M3.4 6.8c2.4-2 6.8-2 9.2 0M6 9.4c1.1-.9 2.9-.9 4 0"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#18181B" stroke-opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#18181B"/><rect x="22" y="4" width="1.6" height="4" rx="1" fill="#18181B" fill-opacity=".5"/></svg></span></div>
+        <div class="body">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 4px 16px"><div style="font:800 26px 'Plus Jakarta Sans';color:#18181B">Calendar</div><div style="display:flex;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6);border-radius:12px;padding:3px"><span style="font:600 11px Inter;color:#fff;background:#7C3AED;border-radius:9px;padding:5px 10px">Week</span><span style="font:500 11px Inter;color:#52525B;padding:5px 10px">Month</span></div></div>
+          <div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.6);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.7);border-radius:20px;padding:14px 6px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><span style="font:500 11px Inter;color:#52525B">S</span><span style="font:600 14px Inter;color:#18181B">9</span><span style="width:5px;height:5px;border-radius:3px;background:#10B981"></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><span style="font:500 11px Inter;color:#52525B">M</span><span style="font:600 14px Inter;color:#18181B">10</span><span style="width:5px;height:5px;border-radius:3px;background:transparent"></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><span style="font:500 11px Inter;color:#52525B">T</span><span style="font:600 14px Inter;color:#18181B">11</span><span style="width:5px;height:5px;border-radius:3px;background:#4F46E5"></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><span style="font:500 11px Inter;color:#52525B">W</span><span style="font:600 14px Inter;color:#18181B">12</span><span style="width:5px;height:5px;border-radius:3px;background:transparent"></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><span style="font:500 11px Inter;color:#52525B">T</span><span style="font:600 14px Inter;color:#18181B">13</span><span style="width:5px;height:5px;border-radius:3px;background:#F59E0B"></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><span style="font:500 11px Inter;color:#52525B">F</span><span style="font:600 14px Inter;color:#18181B">14</span><span style="width:5px;height:5px;border-radius:3px;background:transparent"></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;background:#7C3AED;border-radius:14px;padding:2px 0 6px;margin:-2px 0"><span style="font:500 11px Inter;color:rgba(255,255,255,.8)">S</span><span style="font:700 14px Inter;color:#fff">15</span><span style="width:5px;height:5px;border-radius:3px;background:#fff"></span></div>
+          </div>
+          <div class="lbl" style="color:#52525B;margin:20px 4px 10px">Friday, August 15</div>
+          <div style="position:relative;padding-left:22px">
+            <div style="position:absolute;left:5px;top:4px;bottom:14px;width:2px;background:linear-gradient(#DDD6FE,rgba(221,214,254,.2))"></div>
+            <div style="position:relative;margin-bottom:12px"><span style="position:absolute;left:-22px;top:14px;width:11px;height:11px;border-radius:6px;background:#fff;border:2.5px solid #4F46E5"></span><div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:12px 14px"><div style="font:600 12px Inter;color:#52525B;width:52px">9:00a</div><div style="flex:1;font:500 15px Inter;color:#18181B">Team standup</div><span style="font:500 11px Inter;color:#4F46E5;background:rgba(79,70,229,.1);padding:3px 8px;border-radius:8px">Work</span></div></div>
+            <div style="position:relative;margin-bottom:12px"><span style="position:absolute;left:-22px;top:14px;width:11px;height:11px;border-radius:6px;background:#fff;border:2.5px solid #F59E0B"></span><div style="display:flex;align-items:center;gap:10px;background:#FEF3C7;border:1px solid rgba(245,158,11,.25);border-radius:16px;padding:12px 14px"><div style="font:600 12px Inter;color:#92400E;width:52px">3:00p</div><div style="flex:1;font:500 15px Inter;color:#18181B">Pay Internet bill</div><div style="font:700 14px Inter;color:#18181B">₱1,699</div></div></div>
+            <div style="position:relative"><span style="position:absolute;left:-22px;top:14px;width:11px;height:11px;border-radius:6px;background:#fff;border:2.5px solid #0EA5E9"></span><div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:12px 14px"><div style="font:600 12px Inter;color:#52525B;width:52px">6:30p</div><div style="flex:1;font:500 15px Inter;color:#18181B">Grab home</div><span style="font:500 11px Inter;color:#0EA5E9;background:rgba(14,165,233,.1);padding:3px 8px;border-radius:8px">Transport</span></div></div>
+          </div>
+        </div>
+        <div class="fab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+        <div class="nav" style="background:rgba(255,255,255,.6);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 30px rgba(31,38,135,.08)">
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
+          <div class="it" style="color:#7C3AED"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 3v4M16 3v4"/></svg></div>
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18"/><circle cx="17" cy="14.5" r="1.3" fill="currentColor" stroke="none"/></svg></div>
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l1.7 4.4L18 9l-4.3 1.6L12 15l-1.7-4.4L6 9l4.3-1.6z"/></svg></div>
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+        </div>
+      </div></div>
+      <div class="ph"><div class="scr" style="background:radial-gradient(60% 40% at 8% 0%,rgba(139,92,246,.22),transparent 58%),radial-gradient(52% 34% at 100% 12%,rgba(6,182,212,.16),transparent 60%),#0B0B12">
+        <div class="sb" style="color:#F8FAFC"><span>9:41</span><span class="bars"><svg width="17" height="12" viewBox="0 0 17 12" fill="#F8FAFC"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".35"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#F8FAFC" stroke-width="1.6"><path d="M1 4.2C4.6 1 11.4 1 15 4.2M3.4 6.8c2.4-2 6.8-2 9.2 0M6 9.4c1.1-.9 2.9-.9 4 0"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#F8FAFC" stroke-opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#F8FAFC"/><rect x="22" y="4" width="1.6" height="4" rx="1" fill="#F8FAFC" fill-opacity=".5"/></svg></span></div>
+        <div class="body">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 4px 16px"><div style="font:800 26px 'Plus Jakarta Sans';color:#F8FAFC">Calendar</div><div style="display:flex;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:3px"><span style="font:600 11px Inter;color:#fff;background:#7C3AED;border-radius:9px;padding:5px 10px">Week</span><span style="font:500 11px Inter;color:#A1A1AA;padding:5px 10px">Month</span></div></div>
+          <div style="display:flex;justify-content:space-between;background:rgba(25,25,38,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:14px 6px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><span style="font:500 11px Inter;color:#71717A">S</span><span style="font:600 14px Inter;color:#F8FAFC">9</span><span style="width:5px;height:5px;border-radius:3px;background:#34D399"></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><span style="font:500 11px Inter;color:#71717A">M</span><span style="font:600 14px Inter;color:#F8FAFC">10</span><span style="width:5px;height:5px;border-radius:3px;background:transparent"></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><span style="font:500 11px Inter;color:#71717A">T</span><span style="font:600 14px Inter;color:#F8FAFC">11</span><span style="width:5px;height:5px;border-radius:3px;background:#818CF8"></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><span style="font:500 11px Inter;color:#71717A">W</span><span style="font:600 14px Inter;color:#F8FAFC">12</span><span style="width:5px;height:5px;border-radius:3px;background:transparent"></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><span style="font:500 11px Inter;color:#71717A">T</span><span style="font:600 14px Inter;color:#F8FAFC">13</span><span style="width:5px;height:5px;border-radius:3px;background:#FBBF24"></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><span style="font:500 11px Inter;color:#71717A">F</span><span style="font:600 14px Inter;color:#F8FAFC">14</span><span style="width:5px;height:5px;border-radius:3px;background:transparent"></span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;background:#7C3AED;border-radius:14px;padding:2px 0 6px;margin:-2px 0"><span style="font:500 11px Inter;color:rgba(255,255,255,.8)">S</span><span style="font:700 14px Inter;color:#fff">15</span><span style="width:5px;height:5px;border-radius:3px;background:#fff"></span></div>
+          </div>
+          <div class="lbl" style="color:#A1A1AA;margin:20px 4px 10px">Friday, August 15</div>
+          <div style="position:relative;padding-left:22px">
+            <div style="position:absolute;left:5px;top:4px;bottom:14px;width:2px;background:linear-gradient(rgba(129,140,248,.5),rgba(129,140,248,.05))"></div>
+            <div style="position:relative;margin-bottom:12px"><span style="position:absolute;left:-22px;top:14px;width:11px;height:11px;border-radius:6px;background:#0B0B12;border:2.5px solid #818CF8"></span><div style="display:flex;align-items:center;gap:10px;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px 14px"><div style="font:600 12px Inter;color:#A1A1AA;width:52px">9:00a</div><div style="flex:1;font:500 15px Inter;color:#F8FAFC">Team standup</div><span style="font:500 11px Inter;color:#818CF8;background:rgba(129,140,248,.15);padding:3px 8px;border-radius:8px">Work</span></div></div>
+            <div style="position:relative;margin-bottom:12px"><span style="position:absolute;left:-22px;top:14px;width:11px;height:11px;border-radius:6px;background:#0B0B12;border:2.5px solid #FBBF24"></span><div style="display:flex;align-items:center;gap:10px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);border-radius:16px;padding:12px 14px"><div style="font:600 12px Inter;color:#FBBF24;width:52px">3:00p</div><div style="flex:1;font:500 15px Inter;color:#F8FAFC">Pay Internet bill</div><div style="font:700 14px Inter;color:#F8FAFC">₱1,699</div></div></div>
+            <div style="position:relative"><span style="position:absolute;left:-22px;top:14px;width:11px;height:11px;border-radius:6px;background:#0B0B12;border:2.5px solid #38BDF8"></span><div style="display:flex;align-items:center;gap:10px;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px 14px"><div style="font:600 12px Inter;color:#A1A1AA;width:52px">6:30p</div><div style="flex:1;font:500 15px Inter;color:#F8FAFC">Grab home</div><span style="font:500 11px Inter;color:#38BDF8;background:rgba(56,189,248,.15);padding:3px 8px;border-radius:8px">Transport</span></div></div>
+          </div>
+        </div>
+        <div class="fab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+        <div class="nav" style="background:rgba(25,25,38,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 30px rgba(0,0,0,.35)">
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
+          <div class="it" style="color:#A78BFA"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 3v4M16 3v4"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18"/><circle cx="17" cy="14.5" r="1.3" fill="currentColor" stroke="none"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l1.7 4.4L18 9l-4.3 1.6L12 15l-1.7-4.4L6 9l4.3-1.6z"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+        </div>
+      </div></div>
+      </div>
+    </div>
+
+    <!-- ============ 2c — Money ============ -->
+    <div class="dv-opt" id="2c">
+      <div class="dv-olabel"><a class="dv-oid" href="#2c">2c</a><span><b>Money.</b> Accounts row, recent transactions, budget progress.</span></div>
+      <div style="display:flex;gap:20px">
+      <div class="ph"><div class="scr" style="background:radial-gradient(58% 40% at 10% 2%,rgba(139,92,246,.15),transparent 60%),radial-gradient(50% 32% at 98% 14%,rgba(6,182,212,.12),transparent 60%),#F6F7FB">
+        <div class="sb" style="color:#18181B"><span>9:41</span><span class="bars"><svg width="17" height="12" viewBox="0 0 17 12" fill="#18181B"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".35"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#18181B" stroke-width="1.6"><path d="M1 4.2C4.6 1 11.4 1 15 4.2M3.4 6.8c2.4-2 6.8-2 9.2 0M6 9.4c1.1-.9 2.9-.9 4 0"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#18181B" stroke-opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#18181B"/><rect x="22" y="4" width="1.6" height="4" rx="1" fill="#18181B" fill-opacity=".5"/></svg></span></div>
+        <div class="body">
+          <div style="font:800 26px 'Plus Jakarta Sans';color:#18181B;padding:6px 4px 14px">Money</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.65);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.7);border-radius:20px;padding:14px 18px;box-shadow:0 8px 30px rgba(139,92,246,.13)">
+            <div><div class="lbl" style="color:#7C3AED">Available</div><div style="font:700 28px/1 'Plus Jakarta Sans';letter-spacing:-1px;color:#18181B;margin-top:4px">₱24,500</div></div>
+            <div style="text-align:right"><div style="font:400 11px Inter;color:#52525B">after bills</div><div style="font:600 14px Inter;color:#92400E">−₱5,200</div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin:18px 4px 10px"><span class="lbl" style="color:#52525B">Accounts</span><span style="font:600 12px Inter;color:#7C3AED">+ Add</span></div>
+          <div style="display:flex;gap:10px;overflow-x:auto;margin:0 -18px;padding:0 18px 4px;scrollbar-width:none">
+            <div style="flex:none;width:128px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:14px"><div style="width:26px;height:26px;border-radius:8px;background:#0EA5E9;color:#fff;font:700 11px Inter;display:flex;align-items:center;justify-content:center;margin-bottom:8px">G</div><div style="font:500 12px Inter;color:#52525B">GCash</div><div style="font:700 16px 'Plus Jakarta Sans';color:#18181B;margin-top:2px">₱8,200</div></div>
+            <div style="flex:none;width:128px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:14px"><div style="width:26px;height:26px;border-radius:8px;background:#4F46E5;color:#fff;font:700 11px Inter;display:flex;align-items:center;justify-content:center;margin-bottom:8px">B</div><div style="font:500 12px Inter;color:#52525B">BPI Savings</div><div style="font:700 16px 'Plus Jakarta Sans';color:#18181B;margin-top:2px">₱14,300</div></div>
+            <div style="flex:none;width:128px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:14px"><div style="width:26px;height:26px;border-radius:8px;background:#64748B;color:#fff;font:700 11px Inter;display:flex;align-items:center;justify-content:center;margin-bottom:8px">₱</div><div style="font:500 12px Inter;color:#52525B">Cash</div><div style="font:700 16px 'Plus Jakarta Sans';color:#18181B;margin-top:2px">₱2,000</div></div>
+          </div>
+          <div style="background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:16px;margin-top:14px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:9px"><span style="font:600 13px Inter;color:#18181B">Monthly budget</span><span style="font:600 12px Inter;color:#52525B">₱12,340 / ₱20,000</span></div>
+            <div style="height:8px;border-radius:4px;background:rgba(139,92,246,.12)"><div style="width:62%;height:100%;border-radius:4px;background:#8B5CF6"></div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin:18px 4px 10px"><span class="lbl" style="color:#52525B">Recent</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:12px 14px"><span style="width:8px;height:8px;border-radius:4px;background:#0EA5E9"></span><div style="flex:1"><div style="font:500 15px Inter;color:#18181B">Grab</div><div style="font:400 12px Inter;color:#52525B">Today · Transport</div></div><div style="font:600 15px Inter;color:#18181B">−₱180</div></div>
+            <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:12px 14px"><span style="width:8px;height:8px;border-radius:4px;background:#E11D48"></span><div style="flex:1"><div style="font:500 15px Inter;color:#18181B">Food</div><div style="font:400 12px Inter;color:#52525B">Today · Need</div></div><div style="font:600 15px Inter;color:#18181B">−₱250</div></div>
+            <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:12px 14px"><span style="width:8px;height:8px;border-radius:4px;background:#10B981"></span><div style="flex:1"><div style="font:500 15px Inter;color:#18181B">Salary</div><div style="font:400 12px Inter;color:#52525B">Aug 15 · Income</div></div><div style="font:600 15px Inter;color:#065F46">+₱30,000</div></div>
+          </div>
+        </div>
+        <div class="fab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+        <div class="nav" style="background:rgba(255,255,255,.6);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 30px rgba(31,38,135,.08)">
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 3v4M16 3v4"/></svg></div>
+          <div class="it" style="color:#7C3AED"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18"/><circle cx="17" cy="14.5" r="1.3" fill="currentColor" stroke="none"/></svg></div>
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l1.7 4.4L18 9l-4.3 1.6L12 15l-1.7-4.4L6 9l4.3-1.6z"/></svg></div>
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+        </div>
+      </div></div>
+      <div class="ph"><div class="scr" style="background:radial-gradient(60% 40% at 8% 0%,rgba(139,92,246,.22),transparent 58%),radial-gradient(52% 34% at 100% 12%,rgba(6,182,212,.16),transparent 60%),#0B0B12">
+        <div class="sb" style="color:#F8FAFC"><span>9:41</span><span class="bars"><svg width="17" height="12" viewBox="0 0 17 12" fill="#F8FAFC"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".35"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#F8FAFC" stroke-width="1.6"><path d="M1 4.2C4.6 1 11.4 1 15 4.2M3.4 6.8c2.4-2 6.8-2 9.2 0M6 9.4c1.1-.9 2.9-.9 4 0"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#F8FAFC" stroke-opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#F8FAFC"/><rect x="22" y="4" width="1.6" height="4" rx="1" fill="#F8FAFC" fill-opacity=".5"/></svg></span></div>
+        <div class="body">
+          <div style="font:800 26px 'Plus Jakarta Sans';color:#F8FAFC;padding:6px 4px 14px">Money</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(38,34,60,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:14px 18px;box-shadow:0 8px 30px rgba(139,92,246,.2)">
+            <div><div class="lbl" style="color:#A78BFA">Available</div><div style="font:700 28px/1 'Plus Jakarta Sans';letter-spacing:-1px;color:#F8FAFC;margin-top:4px">₱24,500</div></div>
+            <div style="text-align:right"><div style="font:400 11px Inter;color:#A1A1AA">after bills</div><div style="font:600 14px Inter;color:#FBBF24">−₱5,200</div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin:18px 4px 10px"><span class="lbl" style="color:#A1A1AA">Accounts</span><span style="font:600 12px Inter;color:#A78BFA">+ Add</span></div>
+          <div style="display:flex;gap:10px;overflow-x:auto;margin:0 -18px;padding:0 18px 4px;scrollbar-width:none">
+            <div style="flex:none;width:128px;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px"><div style="width:26px;height:26px;border-radius:8px;background:#0EA5E9;color:#fff;font:700 11px Inter;display:flex;align-items:center;justify-content:center;margin-bottom:8px">G</div><div style="font:500 12px Inter;color:#A1A1AA">GCash</div><div style="font:700 16px 'Plus Jakarta Sans';color:#F8FAFC;margin-top:2px">₱8,200</div></div>
+            <div style="flex:none;width:128px;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px"><div style="width:26px;height:26px;border-radius:8px;background:#4F46E5;color:#fff;font:700 11px Inter;display:flex;align-items:center;justify-content:center;margin-bottom:8px">B</div><div style="font:500 12px Inter;color:#A1A1AA">BPI Savings</div><div style="font:700 16px 'Plus Jakarta Sans';color:#F8FAFC;margin-top:2px">₱14,300</div></div>
+            <div style="flex:none;width:128px;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px"><div style="width:26px;height:26px;border-radius:8px;background:#64748B;color:#fff;font:700 11px Inter;display:flex;align-items:center;justify-content:center;margin-bottom:8px">₱</div><div style="font:500 12px Inter;color:#A1A1AA">Cash</div><div style="font:700 16px 'Plus Jakarta Sans';color:#F8FAFC;margin-top:2px">₱2,000</div></div>
+          </div>
+          <div style="background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;margin-top:14px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:9px"><span style="font:600 13px Inter;color:#F8FAFC">Monthly budget</span><span style="font:600 12px Inter;color:#A1A1AA">₱12,340 / ₱20,000</span></div>
+            <div style="height:8px;border-radius:4px;background:rgba(139,92,246,.2)"><div style="width:62%;height:100%;border-radius:4px;background:#A78BFA"></div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin:18px 4px 10px"><span class="lbl" style="color:#A1A1AA">Recent</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:12px;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px 14px"><span style="width:8px;height:8px;border-radius:4px;background:#38BDF8"></span><div style="flex:1"><div style="font:500 15px Inter;color:#F8FAFC">Grab</div><div style="font:400 12px Inter;color:#A1A1AA">Today · Transport</div></div><div style="font:600 15px Inter;color:#F8FAFC">−₱180</div></div>
+            <div style="display:flex;align-items:center;gap:12px;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px 14px"><span style="width:8px;height:8px;border-radius:4px;background:#FB7185"></span><div style="flex:1"><div style="font:500 15px Inter;color:#F8FAFC">Food</div><div style="font:400 12px Inter;color:#A1A1AA">Today · Need</div></div><div style="font:600 15px Inter;color:#F8FAFC">−₱250</div></div>
+            <div style="display:flex;align-items:center;gap:12px;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px 14px"><span style="width:8px;height:8px;border-radius:4px;background:#10B981"></span><div style="flex:1"><div style="font:500 15px Inter;color:#F8FAFC">Salary</div><div style="font:400 12px Inter;color:#A1A1AA">Aug 15 · Income</div></div><div style="font:600 15px Inter;color:#34D399">+₱30,000</div></div>
+          </div>
+        </div>
+        <div class="fab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+        <div class="nav" style="background:rgba(25,25,38,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 30px rgba(0,0,0,.35)">
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 3v4M16 3v4"/></svg></div>
+          <div class="it" style="color:#A78BFA"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18"/><circle cx="17" cy="14.5" r="1.3" fill="currentColor" stroke="none"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l1.7 4.4L18 9l-4.3 1.6L12 15l-1.7-4.4L6 9l4.3-1.6z"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+        </div>
+      </div></div>
+      </div>
+    </div>
+
+    <!-- ============ 2d — Ask Savi ============ -->
+    <div class="dv-opt" id="2d">
+      <div class="dv-olabel"><a class="dv-oid" href="#2d">2d</a><span><b>Ask Savi.</b> Answer → Reason → Action per D§30. Input bar replaces the FAB here.</span></div>
+      <div style="display:flex;gap:20px">
+      <div class="ph"><div class="scr" style="background:radial-gradient(58% 40% at 10% 2%,rgba(139,92,246,.15),transparent 60%),radial-gradient(50% 32% at 98% 14%,rgba(6,182,212,.12),transparent 60%),#F6F7FB">
+        <div class="sb" style="color:#18181B"><span>9:41</span><span class="bars"><svg width="17" height="12" viewBox="0 0 17 12" fill="#18181B"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".35"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#18181B" stroke-width="1.6"><path d="M1 4.2C4.6 1 11.4 1 15 4.2M3.4 6.8c2.4-2 6.8-2 9.2 0M6 9.4c1.1-.9 2.9-.9 4 0"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#18181B" stroke-opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#18181B"/><rect x="22" y="4" width="1.6" height="4" rx="1" fill="#18181B" fill-opacity=".5"/></svg></span></div>
+        <div class="body" style="bottom:0;position:absolute;inset:52px 0 0;padding:4px 18px 0;display:flex;flex-direction:column">
+          <div style="padding:6px 4px 4px"><div style="font:800 24px 'Plus Jakarta Sans';color:#18181B">Ask Savi ✨</div><div style="font:400 13px Inter;color:#52525B;margin-top:2px">Your personal money &amp; life assistant</div></div>
+          <div style="flex:1;overflow:hidden;margin-top:14px;display:flex;flex-direction:column;gap:12px">
+            <div style="align-self:flex-end;max-width:80%;background:#7C3AED;color:#fff;font:500 14px/1.4 Inter;padding:11px 15px;border-radius:18px 18px 4px 18px">Can I afford a ₱4,000 laptop this month?</div>
+            <div style="background:#EBE7F9;border:1px solid rgba(255,255,255,.6);border-radius:18px 18px 18px 4px;padding:16px;box-shadow:0 8px 30px rgba(139,92,246,.15)">
+              <div style="font:600 15px Inter;color:#18181B">You can probably afford it.</div>
+              <div style="font:400 13px/1.5 Inter;color:#52525B;margin-top:8px">After your upcoming bills, you'll have approximately ₱6,300. I'd recommend waiting until your next salary if you want to keep your ₱5,000 savings goal.</div>
+              <div style="margin-top:12px;background:#7C3AED;color:#fff;font:600 13px Inter;text-align:center;padding:10px;border-radius:12px">Create Savings Plan</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.6);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.7);border-radius:24px;padding:8px 8px 8px 16px;margin:14px 0 20px;box-shadow:0 8px 30px rgba(31,38,135,.08)"><span style="flex:1;font:400 14px Inter;color:#52525B">Ask anything…</span><div style="width:34px;height:34px;border-radius:17px;background:#7C3AED;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div></div>
+        </div>
+        <div class="nav" style="background:rgba(255,255,255,.6);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 30px rgba(31,38,135,.08)">
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 3v4M16 3v4"/></svg></div>
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18"/><circle cx="17" cy="14.5" r="1.3" fill="currentColor" stroke="none"/></svg></div>
+          <div class="it" style="color:#7C3AED"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"><path d="M12 3l1.7 4.4L18 9l-4.3 1.6L12 15l-1.7-4.4L6 9l4.3-1.6z"/></svg></div>
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+        </div>
+      </div></div>
+      <div class="ph"><div class="scr" style="background:radial-gradient(60% 40% at 8% 0%,rgba(139,92,246,.22),transparent 58%),radial-gradient(52% 34% at 100% 12%,rgba(6,182,212,.16),transparent 60%),#0B0B12">
+        <div class="sb" style="color:#F8FAFC"><span>9:41</span><span class="bars"><svg width="17" height="12" viewBox="0 0 17 12" fill="#F8FAFC"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".35"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#F8FAFC" stroke-width="1.6"><path d="M1 4.2C4.6 1 11.4 1 15 4.2M3.4 6.8c2.4-2 6.8-2 9.2 0M6 9.4c1.1-.9 2.9-.9 4 0"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#F8FAFC" stroke-opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#F8FAFC"/><rect x="22" y="4" width="1.6" height="4" rx="1" fill="#F8FAFC" fill-opacity=".5"/></svg></span></div>
+        <div class="body" style="bottom:0;position:absolute;inset:52px 0 0;padding:4px 18px 0;display:flex;flex-direction:column">
+          <div style="padding:6px 4px 4px"><div style="font:800 24px 'Plus Jakarta Sans';color:#F8FAFC">Ask Savi ✨</div><div style="font:400 13px Inter;color:#A1A1AA;margin-top:2px">Your personal money &amp; life assistant</div></div>
+          <div style="flex:1;overflow:hidden;margin-top:14px;display:flex;flex-direction:column;gap:12px">
+            <div style="align-self:flex-end;max-width:80%;background:#7C3AED;color:#fff;font:500 14px/1.4 Inter;padding:11px 15px;border-radius:18px 18px 4px 18px">Can I afford a ₱4,000 laptop this month?</div>
+            <div style="background:#26223C;border:1px solid rgba(255,255,255,.1);border-radius:18px 18px 18px 4px;padding:16px;box-shadow:0 8px 30px rgba(139,92,246,.22)">
+              <div style="font:600 15px Inter;color:#F8FAFC">You can probably afford it.</div>
+              <div style="font:400 13px/1.5 Inter;color:#A1A1AA;margin-top:8px">After your upcoming bills, you'll have approximately ₱6,300. I'd recommend waiting until your next salary if you want to keep your ₱5,000 savings goal.</div>
+              <div style="margin-top:12px;background:#7C3AED;color:#fff;font:600 13px Inter;text-align:center;padding:10px;border-radius:12px">Create Savings Plan</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:rgba(25,25,38,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:8px 8px 8px 16px;margin:14px 0 20px;box-shadow:0 8px 30px rgba(0,0,0,.3)"><span style="flex:1;font:400 14px Inter;color:#A1A1AA">Ask anything…</span><div style="width:34px;height:34px;border-radius:17px;background:#7C3AED;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div></div>
+        </div>
+        <div class="nav" style="background:rgba(25,25,38,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 30px rgba(0,0,0,.35)">
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 3v4M16 3v4"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18"/><circle cx="17" cy="14.5" r="1.3" fill="currentColor" stroke="none"/></svg></div>
+          <div class="it" style="color:#A78BFA"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"><path d="M12 3l1.7 4.4L18 9l-4.3 1.6L12 15l-1.7-4.4L6 9l4.3-1.6z"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+        </div>
+      </div></div>
+      </div>
+    </div>
+
+    <!-- ============ 2e — More ============ -->
+    <div class="dv-opt" id="2e">
+      <div class="dv-olabel"><a class="dv-oid" href="#2e">2e</a><span><b>More.</b> Profile + Tasks + Settings. No FAB — no single obvious "add" here per D§62.</span></div>
+      <div style="display:flex;gap:20px">
+      <div class="ph"><div class="scr" style="background:radial-gradient(58% 40% at 10% 2%,rgba(139,92,246,.15),transparent 60%),radial-gradient(50% 32% at 98% 14%,rgba(6,182,212,.12),transparent 60%),#F6F7FB">
+        <div class="sb" style="color:#18181B"><span>9:41</span><span class="bars"><svg width="17" height="12" viewBox="0 0 17 12" fill="#18181B"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".35"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#18181B" stroke-width="1.6"><path d="M1 4.2C4.6 1 11.4 1 15 4.2M3.4 6.8c2.4-2 6.8-2 9.2 0M6 9.4c1.1-.9 2.9-.9 4 0"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#18181B" stroke-opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#18181B"/><rect x="22" y="4" width="1.6" height="4" rx="1" fill="#18181B" fill-opacity=".5"/></svg></span></div>
+        <div class="body">
+          <div style="font:800 26px 'Plus Jakarta Sans';color:#18181B;padding:6px 4px 16px">More</div>
+          <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.6);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.7);border-radius:20px;padding:16px 18px"><div style="width:46px;height:46px;border-radius:23px;background:linear-gradient(135deg,#A78BFA,#7C3AED);display:flex;align-items:center;justify-content:center;font:700 17px 'Plus Jakarta Sans';color:#fff">A</div><div style="flex:1"><div style="font:600 16px Inter;color:#18181B">Alex Rivera</div><div style="font:400 12px Inter;color:#52525B">alex@example.com</div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px">
+            <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:13px 16px"><div style="width:30px;height:30px;border-radius:9px;background:rgba(124,58,237,.12);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div style="flex:1;font:500 14px Inter;color:#18181B">Tasks</div><span style="font:600 11px Inter;color:#7C3AED;background:rgba(124,58,237,.1);padding:2px 8px;border-radius:10px">3</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+            <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:13px 16px"><div style="width:30px;height:30px;border-radius:9px;background:rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M4 12h1M19 12h1M12 4v1M12 19v1M6 6l.7.7M17.3 17.3l.7.7M6 18l.7-.7M17.3 6.7l.7-.7"/></svg></div><div style="flex:1;font:500 14px Inter;color:#18181B">Settings</div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+            <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:13px 16px"><div style="width:30px;height:30px;border-radius:9px;background:rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div><div style="flex:1;font:500 14px Inter;color:#18181B">Notifications</div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+            <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:13px 16px"><div style="width:30px;height:30px;border-radius:9px;background:rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg></div><div style="flex:1;font:500 14px Inter;color:#18181B">About Savi</div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#52525B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+          </div>
+        </div>
+        <div class="nav" style="background:rgba(255,255,255,.6);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 30px rgba(31,38,135,.08)">
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 3v4M16 3v4"/></svg></div>
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18"/><circle cx="17" cy="14.5" r="1.3" fill="currentColor" stroke="none"/></svg></div>
+          <div class="it" style="color:#52525B"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l1.7 4.4L18 9l-4.3 1.6L12 15l-1.7-4.4L6 9l4.3-1.6z"/></svg></div>
+          <div class="it" style="color:#7C3AED"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+        </div>
+      </div></div>
+      <div class="ph"><div class="scr" style="background:radial-gradient(60% 40% at 8% 0%,rgba(139,92,246,.22),transparent 58%),radial-gradient(52% 34% at 100% 12%,rgba(6,182,212,.16),transparent 60%),#0B0B12">
+        <div class="sb" style="color:#F8FAFC"><span>9:41</span><span class="bars"><svg width="17" height="12" viewBox="0 0 17 12" fill="#F8FAFC"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".35"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#F8FAFC" stroke-width="1.6"><path d="M1 4.2C4.6 1 11.4 1 15 4.2M3.4 6.8c2.4-2 6.8-2 9.2 0M6 9.4c1.1-.9 2.9-.9 4 0"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#F8FAFC" stroke-opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#F8FAFC"/><rect x="22" y="4" width="1.6" height="4" rx="1" fill="#F8FAFC" fill-opacity=".5"/></svg></span></div>
+        <div class="body">
+          <div style="font:800 26px 'Plus Jakarta Sans';color:#F8FAFC;padding:6px 4px 16px">More</div>
+          <div style="display:flex;align-items:center;gap:14px;background:rgba(25,25,38,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:16px 18px"><div style="width:46px;height:46px;border-radius:23px;background:linear-gradient(135deg,#A78BFA,#7C3AED);display:flex;align-items:center;justify-content:center;font:700 17px 'Plus Jakarta Sans';color:#fff">A</div><div style="flex:1"><div style="font:600 16px Inter;color:#F8FAFC">Alex Rivera</div><div style="font:400 12px Inter;color:#A1A1AA">alex@example.com</div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px">
+            <div style="display:flex;align-items:center;gap:12px;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:13px 16px"><div style="width:30px;height:30px;border-radius:9px;background:rgba(167,139,250,.15);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div style="flex:1;font:500 14px Inter;color:#F8FAFC">Tasks</div><span style="font:600 11px Inter;color:#A78BFA;background:rgba(167,139,250,.15);padding:2px 8px;border-radius:10px">3</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+            <div style="display:flex;align-items:center;gap:12px;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:13px 16px"><div style="width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M4 12h1M19 12h1M12 4v1M12 19v1M6 6l.7.7M17.3 17.3l.7.7M6 18l.7-.7M17.3 6.7l.7-.7"/></svg></div><div style="flex:1;font:500 14px Inter;color:#F8FAFC">Settings</div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+            <div style="display:flex;align-items:center;gap:12px;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:13px 16px"><div style="width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div><div style="flex:1;font:500 14px Inter;color:#F8FAFC">Notifications</div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+            <div style="display:flex;align-items:center;gap:12px;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:13px 16px"><div style="width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg></div><div style="flex:1;font:500 14px Inter;color:#F8FAFC">About Savi</div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+          </div>
+        </div>
+        <div class="nav" style="background:rgba(25,25,38,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 30px rgba(0,0,0,.35)">
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 3v4M16 3v4"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18"/><circle cx="17" cy="14.5" r="1.3" fill="currentColor" stroke="none"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l1.7 4.4L18 9l-4.3 1.6L12 15l-1.7-4.4L6 9l4.3-1.6z"/></svg></div>
+          <div class="it" style="color:#A78BFA"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+        </div>
+      </div></div>
+      </div>
+    </div>
+
+  </div>
+  <p class="dv-next">Try next: "add Bills/Goals/Budget detail screens too" · "make the split bar a 3-way split with Savings" · "wire up Quick Add as a bottom sheet"</p>
+</section>
+<section class="dv-turn" id="t1">
+  <div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Dashboard — four directions</span></div>
+  <p class="dv-tsub">Same data, same tokens, four different bets on hierarchy, glass depth, density, big-number type and data-viz. Built in real backdrop-blur (the intent your Android baseline falls back from). <a class="dv-oid" href="#1a">1a</a> is the calm canon; each one after pushes a different axis. Mix and match — tell me which halves to combine.</p>
+  <div class="dv-opts">
+
+    <!-- ============ 1a — Calm Canon (light) ============ -->
+    <div class="dv-opt" id="1a">
+      <div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a><span><b>Calm Canon · light.</b> The spec, elevated. Strict L1→L5 hierarchy, generous air, one hero card with the Savi glow.</span></div>
+      <div class="ph"><div class="scr" style="background:radial-gradient(58% 40% at 10% 2%,rgba(139,92,246,.16),transparent 60%),radial-gradient(50% 32% at 98% 14%,rgba(6,182,212,.13),transparent 60%),radial-gradient(65% 42% at 26% 100%,rgba(139,92,246,.09),transparent 60%),#F6F7FB">
+        <div class="sb" style="color:#18181B"><span>9:41</span><span class="bars"><svg width="17" height="12" viewBox="0 0 17 12" fill="#18181B"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".35"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#18181B" stroke-width="1.6"><path d="M1 4.2C4.6 1 11.4 1 15 4.2M3.4 6.8c2.4-2 6.8-2 9.2 0M6 9.4c1.1-.9 2.9-.9 4 0"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#18181B" stroke-opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#18181B"/><rect x="22" y="4" width="1.6" height="4" rx="1" fill="#18181B" fill-opacity=".5"/></svg></span></div>
+        <div class="body">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 4px 14px">
+            <div><div style="font:600 13px Inter;color:#52525B">Good morning 👋</div><div style="font:700 22px/1.1 'Plus Jakarta Sans';color:#18181B;margin-top:2px">Alex</div></div>
+            <div style="width:38px;height:38px;border-radius:19px;background:linear-gradient(135deg,#A78BFA,#7C3AED);display:flex;align-items:center;justify-content:center;font:700 15px 'Plus Jakarta Sans';color:#fff">A</div>
+          </div>
+          <!-- L1 hero -->
+          <div style="background:rgba(255,255,255,.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.75);border-radius:26px;padding:22px;box-shadow:0 8px 30px rgba(139,92,246,.15)">
+            <div class="lbl" style="color:#7C3AED">Available</div>
+            <div style="font:700 42px/1 'Plus Jakarta Sans';letter-spacing:-1.5px;color:#18181B;margin:9px 0 6px" class="mono">₱24,500</div>
+            <div style="font:400 12px Inter;color:#52525B">after ₱5,200 in upcoming bills</div>
+          </div>
+          <!-- L5 split -->
+          <div style="display:flex;gap:12px;margin-top:14px">
+            <div style="flex:1;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:14px 16px"><div style="font:400 12px Inter;color:#52525B">Income</div><div style="font:700 19px 'Plus Jakarta Sans';color:#065F46;margin-top:3px">₱30k</div></div>
+            <div style="flex:1;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:14px 16px"><div style="font:400 12px Inter;color:#52525B">Expenses</div><div style="font:700 19px 'Plus Jakarta Sans';color:#18181B;margin-top:3px">₱12.3k</div></div>
+          </div>
+          <!-- L2 upcoming -->
+          <div class="lbl" style="color:#52525B;margin:20px 4px 10px">Upcoming</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:12px 14px"><span style="width:8px;height:8px;border-radius:4px;background:#F59E0B"></span><div style="flex:1"><div style="font:500 15px Inter;color:#18181B">Internet</div><div style="font:400 12px Inter;color:#92400E">Due tomorrow</div></div><div style="font:600 15px Inter;color:#18181B">₱1,699</div></div>
+            <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:12px 14px"><span style="width:8px;height:8px;border-radius:4px;background:#F59E0B"></span><div style="flex:1"><div style="font:500 15px Inter;color:#18181B">Electricity</div><div style="font:400 12px Inter;color:#52525B">Due in 4 days</div></div><div style="font:600 15px Inter;color:#18181B">₱2,150</div></div>
+          </div>
+          <!-- L4 insight -->
+          <div style="background:#EBE7F9;border:1px solid rgba(255,255,255,.6);border-radius:22px;padding:18px;margin-top:16px;box-shadow:0 8px 30px rgba(139,92,246,.15)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px"><span style="display:flex;gap:3px"><span style="width:6px;height:6px;border-radius:3px;background:#A78BFA"></span><span style="width:6px;height:6px;border-radius:3px;background:#06B6D4;opacity:.7"></span></span><span style="font:600 12px Inter;letter-spacing:.05em;text-transform:uppercase;color:#7C3AED">Savi Insight</span></div>
+            <div style="font:500 16px/1.4 Inter;color:#18181B">Your food spending is 24% higher than last month.</div>
+            <div style="font:400 13px/1.4 Inter;color:#52525B;margin-top:6px">You could save around ₱1,200 by easing up on delivery.</div>
+            <div style="font:600 13px Inter;color:#7C3AED;margin-top:12px">View spending →</div>
+          </div>
+        </div>
+        <div class="fab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+        <div class="nav" style="background:rgba(255,255,255,.6);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 30px rgba(31,38,135,.08)">
+          <div class="it" style="color:#7C3AED"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>Home</div>
+          <div class="it" style="color:#52525B"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 3v4M16 3v4"/></svg>Calendar</div>
+          <div class="it" style="color:#52525B"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18"/><circle cx="17" cy="14.5" r="1.3" fill="currentColor" stroke="none"/></svg>Money</div>
+          <div class="it" style="color:#52525B"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l1.7 4.4L18 9l-4.3 1.6L12 15l-1.7-4.4L6 9l4.3-1.6z"/></svg>Savi</div>
+          <div class="it" style="color:#52525B"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>More</div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ============ 1b — Hero Focus (dark) ============ -->
+    <div class="dv-opt" id="1b">
+      <div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a><span><b>Hero Focus · dark.</b> The number owns the top third. A 30-day balance sparkline lives inside the hero; income/expense becomes one split bar.</span></div>
+      <div class="ph"><div class="scr" style="background:radial-gradient(60% 40% at 8% 0%,rgba(139,92,246,.22),transparent 58%),radial-gradient(52% 34% at 100% 12%,rgba(6,182,212,.16),transparent 60%),radial-gradient(70% 45% at 30% 100%,rgba(139,92,246,.12),transparent 60%),#0B0B12">
+        <div class="sb" style="color:#F8FAFC"><span>9:41</span><span class="bars"><svg width="17" height="12" viewBox="0 0 17 12" fill="#F8FAFC"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".35"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#F8FAFC" stroke-width="1.6"><path d="M1 4.2C4.6 1 11.4 1 15 4.2M3.4 6.8c2.4-2 6.8-2 9.2 0M6 9.4c1.1-.9 2.9-.9 4 0"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#F8FAFC" stroke-opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#F8FAFC"/><rect x="22" y="4" width="1.6" height="4" rx="1" fill="#F8FAFC" fill-opacity=".5"/></svg></span></div>
+        <div class="body">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 4px 18px">
+            <div><div style="font:600 14px Inter;color:#A1A1AA">Good morning, Alex 👋</div><div style="font:400 12px Inter;color:#71717A;margin-top:3px">Friday, August 15</div></div>
+            <div style="width:36px;height:36px;border-radius:18px;background:linear-gradient(135deg,#A78BFA,#7C3AED);display:flex;align-items:center;justify-content:center;font:700 14px 'Plus Jakarta Sans';color:#fff">A</div>
+          </div>
+          <!-- big hero -->
+          <div style="background:rgba(38,34,60,.55);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.1);border-radius:28px;padding:24px 22px 0;box-shadow:0 8px 30px rgba(139,92,246,.25);overflow:hidden">
+            <div class="lbl" style="color:#A78BFA">Available money</div>
+            <div style="font:800 52px/1 'Plus Jakarta Sans';letter-spacing:-2.5px;color:#F8FAFC;margin:12px 0 6px" class="mono">₱24,500</div>
+            <div style="font:400 13px Inter;color:#A1A1AA;margin-bottom:6px">after ₱5,200 in upcoming bills · <span style="color:#34D399">+8% vs last week</span></div>
+            <svg width="100%" height="66" viewBox="0 0 300 66" preserveAspectRatio="none" style="display:block"><defs><linearGradient id="sl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A78BFA" stop-opacity=".35"/><stop offset="1" stop-color="#A78BFA" stop-opacity="0"/></linearGradient></defs><path d="M0 48 30 44 60 50 90 38 120 42 150 30 180 34 210 22 240 28 270 16 300 20 V66 H0 Z" fill="url(#sl)"/><path d="M0 48 30 44 60 50 90 38 120 42 150 30 180 34 210 22 240 28 270 16 300 20" fill="none" stroke="#A78BFA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <!-- income/expense split bar -->
+          <div style="background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:16px;margin-top:14px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:10px"><span style="font:400 12px Inter;color:#A1A1AA">This month</span><span style="font:600 12px Inter;color:#A1A1AA">₱42,340 total</span></div>
+            <div style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px"><div style="flex:71;background:#10B981;border-radius:5px 0 0 5px"></div><div style="flex:29;background:#F97316;border-radius:0 5px 5px 0"></div></div>
+            <div style="display:flex;justify-content:space-between;margin-top:10px"><span style="font:500 13px Inter;color:#34D399">Income ₱30,000</span><span style="font:500 13px Inter;color:#FB923C">Spent ₱12,340</span></div>
+          </div>
+          <!-- bills this week (swipe) -->
+          <div style="margin:16px 4px 10px"><span class="lbl" style="color:#A1A1AA">Bills this week</span></div>
+          <div style="display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -18px;padding:0 18px 4px;scrollbar-width:none">
+            <div style="scroll-snap-align:start;flex:none;width:150px;background:rgba(25,25,38,.5);border:1px solid rgba(251,191,36,.3);border-radius:16px;padding:14px"><div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:4px;background:#F59E0B"></span><span style="font:500 13px Inter;color:#F8FAFC">Internet</span></div><div style="font:700 18px 'Plus Jakarta Sans';color:#F8FAFC;margin-top:8px">₱1,699</div><div style="font:500 11px Inter;color:#FBBF24;margin-top:2px">Due tomorrow</div></div>
+            <div style="scroll-snap-align:start;flex:none;width:150px;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px"><div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:4px;background:#F59E0B"></span><span style="font:500 13px Inter;color:#F8FAFC">Electricity</span></div><div style="font:700 18px 'Plus Jakarta Sans';color:#F8FAFC;margin-top:8px">₱2,150</div><div style="font:400 11px Inter;color:#A1A1AA;margin-top:2px">Thu · in 4 days</div></div>
+            <div style="scroll-snap-align:start;flex:none;width:150px;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px"><div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:4px;background:#F59E0B"></span><span style="font:500 13px Inter;color:#F8FAFC">Water</span></div><div style="font:700 18px 'Plus Jakarta Sans';color:#F8FAFC;margin-top:8px">₱1,351</div><div style="font:400 11px Inter;color:#A1A1AA;margin-top:2px">Sat · in 6 days</div></div>
+            <div style="scroll-snap-align:start;flex:none;width:150px;background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px"><div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:4px;background:#F59E0B"></span><span style="font:500 13px Inter;color:#F8FAFC">Streaming</span></div><div style="font:700 18px 'Plus Jakarta Sans';color:#F8FAFC;margin-top:8px">₱549</div><div style="font:400 11px Inter;color:#A1A1AA;margin-top:2px">Sun · in 7 days</div></div>
+          </div>
+          <div style="display:flex;gap:6px;justify-content:center;margin-top:10px">
+            <span style="width:6px;height:6px;border-radius:3px;background:#A78BFA"></span><span style="width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.2)"></span><span style="width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.2)"></span><span style="width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.2)"></span>
+          </div>
+          <!-- insight -->
+          <div style="background:#26223C;border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:18px;margin-top:14px;box-shadow:0 8px 30px rgba(139,92,246,.22)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="display:flex;gap:3px"><span style="width:6px;height:6px;border-radius:3px;background:#A78BFA"></span><span style="width:6px;height:6px;border-radius:3px;background:#06B6D4;opacity:.7"></span></span><span style="font:600 12px Inter;letter-spacing:.05em;text-transform:uppercase;color:#A78BFA">Savi Insight</span></div>
+            <div style="font:500 15px/1.4 Inter;color:#F8FAFC">Food spending is 24% up. Trimming delivery could save you ₱1,200 this month.</div>
+            <div style="font:600 13px Inter;color:#A78BFA;margin-top:12px">View spending →</div>
+          </div>
+        </div>
+        <div class="fab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+        <div class="nav" style="background:rgba(25,25,38,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 30px rgba(0,0,0,.35)">
+          <div class="it" style="color:#A78BFA"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 3v4M16 3v4"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18"/><circle cx="17" cy="14.5" r="1.3" fill="currentColor" stroke="none"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l1.7 4.4L18 9l-4.3 1.6L12 15l-1.7-4.4L6 9l4.3-1.6z"/></svg></div>
+          <div class="it" style="color:#71717A"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ============ 1c — Today Flow (light) ============ -->
+    <div class="dv-opt" id="1c">
+      <div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a><span><b>Today Flow · light.</b> Savi's real edge — money + schedule in one stream. Available compresses to a strip; the day reads as a single timeline of money and events.</span></div>
+      <div class="ph"><div class="scr" style="background:radial-gradient(58% 40% at 10% 2%,rgba(139,92,246,.15),transparent 60%),radial-gradient(50% 32% at 98% 14%,rgba(6,182,212,.12),transparent 60%),#F6F7FB">
+        <div class="sb" style="color:#18181B"><span>9:41</span><span class="bars"><svg width="17" height="12" viewBox="0 0 17 12" fill="#18181B"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".35"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#18181B" stroke-width="1.6"><path d="M1 4.2C4.6 1 11.4 1 15 4.2M3.4 6.8c2.4-2 6.8-2 9.2 0M6 9.4c1.1-.9 2.9-.9 4 0"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#18181B" stroke-opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#18181B"/><rect x="22" y="4" width="1.6" height="4" rx="1" fill="#18181B" fill-opacity=".5"/></svg></span></div>
+        <div class="body">
+          <div style="padding:6px 4px 12px;font:700 24px/1.1 'Plus Jakarta Sans';color:#18181B">Today <span style="font:400 14px Inter;color:#52525B">· Fri, Aug 15</span></div>
+          <!-- available strip -->
+          <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.65);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.7);border-radius:20px;padding:14px 18px;box-shadow:0 8px 30px rgba(139,92,246,.13)">
+            <div><div style="font:600 11px Inter;letter-spacing:.06em;text-transform:uppercase;color:#7C3AED">Available</div><div style="font:700 28px/1 'Plus Jakarta Sans';letter-spacing:-1px;color:#18181B;margin-top:4px" class="mono">₱24,500</div></div>
+            <div style="text-align:right"><div style="font:400 11px Inter;color:#52525B">after bills</div><div style="font:600 14px Inter;color:#92400E">−₱5,200</div></div>
+          </div>
+          <!-- timeline -->
+          <div style="position:relative;margin:20px 0 0;padding-left:26px">
+            <div style="position:absolute;left:6px;top:6px;bottom:20px;width:2px;background:linear-gradient(#DDD6FE,rgba(221,214,254,.2))"></div>
+            <!-- item -->
+            <div style="position:relative;margin-bottom:14px"><span style="position:absolute;left:-26px;top:4px;width:14px;height:14px;border-radius:7px;background:#fff;border:3px solid #10B981"></span>
+              <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:12px 14px"><div style="flex:1"><div style="font:600 15px Inter;color:#18181B">Salary</div><div style="font:400 12px Inter;color:#52525B">8:00 AM · Income</div></div><div style="font:700 16px 'Plus Jakarta Sans';color:#065F46">+₱30,000</div></div>
+            </div>
+            <div style="position:relative;margin-bottom:14px"><span style="position:absolute;left:-26px;top:4px;width:14px;height:14px;border-radius:7px;background:#fff;border:3px solid #4F46E5"></span>
+              <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:12px 14px"><div style="flex:1"><div style="font:600 15px Inter;color:#18181B">Team standup</div><div style="font:400 12px Inter;color:#52525B">9:00 AM · Work</div></div><span style="width:8px;height:8px;border-radius:4px;background:#4F46E5"></span></div>
+            </div>
+            <div style="position:relative;margin-bottom:14px"><span style="position:absolute;left:-26px;top:4px;width:14px;height:14px;border-radius:7px;background:#fff;border:3px solid #F59E0B"></span>
+              <div style="display:flex;align-items:center;gap:10px;background:#FEF3C7;border:1px solid rgba(245,158,11,.25);border-radius:16px;padding:12px 14px"><div style="flex:1"><div style="font:600 15px Inter;color:#18181B">Internet bill</div><div style="font:400 12px Inter;color:#92400E">Due today</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div style="font:700 15px 'Plus Jakarta Sans';color:#18181B">₱1,699</div><div style="font:600 11px Inter;color:#7C3AED;background:rgba(124,58,237,.1);padding:3px 8px;border-radius:8px">Pay</div></div></div>
+            </div>
+            <div style="position:relative;margin-bottom:14px"><span style="position:absolute;left:-26px;top:4px;width:14px;height:14px;border-radius:7px;background:#fff;border:3px solid #0EA5E9"></span>
+              <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:12px 14px"><div style="flex:1"><div style="font:600 15px Inter;color:#18181B">Grab home</div><div style="font:400 12px Inter;color:#52525B">6:30 PM · Transport</div></div><div style="font:600 15px Inter;color:#18181B">−₱180</div></div>
+            </div>
+          </div>
+          <!-- insight tucked in flow -->
+          <div style="background:#EBE7F9;border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:15px;box-shadow:0 8px 30px rgba(139,92,246,.15)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="display:flex;gap:3px"><span style="width:6px;height:6px;border-radius:3px;background:#A78BFA"></span><span style="width:6px;height:6px;border-radius:3px;background:#06B6D4;opacity:.7"></span></span><span style="font:600 11px Inter;letter-spacing:.05em;text-transform:uppercase;color:#7C3AED">Savi Insight</span></div>
+            <div style="font:500 14px/1.4 Inter;color:#18181B">2 bills and 1 payday today — you'll net <b>+₱28,121</b> by tonight.</div>
+          </div>
+        </div>
+        <div class="fab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+        <div class="nav" style="background:rgba(255,255,255,.6);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 30px rgba(31,38,135,.08)">
+          <div class="it" style="color:#7C3AED"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>Home</div>
+          <div class="it" style="color:#52525B"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 3v4M16 3v4"/></svg>Calendar</div>
+          <div class="it" style="color:#52525B"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18"/><circle cx="17" cy="14.5" r="1.3" fill="currentColor" stroke="none"/></svg>Money</div>
+          <div class="it" style="color:#52525B"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l1.7 4.4L18 9l-4.3 1.6L12 15l-1.7-4.4L6 9l4.3-1.6z"/></svg>Savi</div>
+          <div class="it" style="color:#52525B"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>More</div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ============ 1d — Insight & Data (dark) ============ -->
+    <div class="dv-opt" id="1d">
+      <div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a><span><b>Insight &amp; Data · dark.</b> Available still leads (spec-safe), then a category donut and a 7-day spend bar. Minimalist charts, brand series only.</span></div>
+      <div class="ph"><div class="scr" style="background:radial-gradient(60% 40% at 8% 0%,rgba(139,92,246,.2),transparent 58%),radial-gradient(52% 34% at 100% 12%,rgba(6,182,212,.15),transparent 60%),#0B0B12">
+        <div class="sb" style="color:#F8FAFC"><span>9:41</span><span class="bars"><svg width="17" height="12" viewBox="0 0 17 12" fill="#F8FAFC"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".35"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#F8FAFC" stroke-width="1.6"><path d="M1 4.2C4.6 1 11.4 1 15 4.2M3.4 6.8c2.4-2 6.8-2 9.2 0M6 9.4c1.1-.9 2.9-.9 4 0"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#F8FAFC" stroke-opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#F8FAFC"/><rect x="22" y="4" width="1.6" height="4" rx="1" fill="#F8FAFC" fill-opacity=".5"/></svg></span></div>
+        <div class="body">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 4px 16px"><div style="font:600 14px Inter;color:#A1A1AA">Good morning, Alex 👋</div><div style="width:36px;height:36px;border-radius:18px;background:linear-gradient(135deg,#A78BFA,#7C3AED);display:flex;align-items:center;justify-content:center;font:700 14px 'Plus Jakarta Sans';color:#fff">A</div></div>
+          <!-- available compact -->
+          <div style="background:rgba(38,34,60,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:18px 20px;box-shadow:0 8px 30px rgba(139,92,246,.2)"><div class="lbl" style="color:#A78BFA">Available</div><div style="font:800 36px/1 'Plus Jakarta Sans';letter-spacing:-1.5px;color:#F8FAFC;margin:8px 0 5px" class="mono">₱24,500</div><div style="font:400 12px Inter;color:#A1A1AA">after ₱5,200 in upcoming bills</div></div>
+          <!-- donut -->
+          <div style="background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:18px;margin-top:14px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:14px"><span style="font:600 14px Inter;color:#F8FAFC">Spending by category</span><span style="font:400 12px Inter;color:#A1A1AA">Aug</span></div>
+            <div style="display:flex;align-items:center;gap:20px">
+              <div style="width:112px;height:112px;border-radius:56px;background:conic-gradient(#E11D48 0 32%,#0EA5E9 32% 55%,#7E22CE 55% 73%,#0D9488 73% 88%,#64748B 88% 100%);display:flex;align-items:center;justify-content:center;flex:none"><div style="width:72px;height:72px;border-radius:36px;background:#12121b;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font:400 10px Inter;color:#A1A1AA">spent</div><div style="font:700 15px 'Plus Jakarta Sans';color:#F8FAFC">₱12.3k</div></div></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:9px">
+                <div style="display:flex;align-items:center;gap:8px"><span style="width:9px;height:9px;border-radius:5px;background:#FB7185"></span><span style="font:500 13px Inter;color:#F8FAFC;flex:1">Food</span><span style="font:600 13px Inter;color:#A1A1AA">₱3.9k</span></div>
+                <div style="display:flex;align-items:center;gap:8px"><span style="width:9px;height:9px;border-radius:5px;background:#38BDF8"></span><span style="font:500 13px Inter;color:#F8FAFC;flex:1">Transport</span><span style="font:600 13px Inter;color:#A1A1AA">₱2.8k</span></div>
+                <div style="display:flex;align-items:center;gap:8px"><span style="width:9px;height:9px;border-radius:5px;background:#C084FC"></span><span style="font:500 13px Inter;color:#F8FAFC;flex:1">Fun</span><span style="font:600 13px Inter;color:#A1A1AA">₱2.2k</span></div>
+                <div style="display:flex;align-items:center;gap:8px"><span style="width:9px;height:9px;border-radius:5px;background:#2DD4BF"></span><span style="font:500 13px Inter;color:#F8FAFC;flex:1">Health</span><span style="font:600 13px Inter;color:#A1A1AA">₱1.8k</span></div>
+              </div>
+            </div>
+          </div>
+          <!-- weekly bars -->
+          <div style="background:rgba(25,25,38,.5);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:18px;margin-top:14px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:16px"><span style="font:600 14px Inter;color:#F8FAFC">This week</span><span style="font:400 12px Inter;color:#A1A1AA">₱4,120</span></div>
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;height:76px;gap:8px">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:100%;height:34px;background:rgba(139,92,246,.35);border-radius:6px"></div><span style="font:400 10px Inter;color:#71717A">M</span></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:100%;height:52px;background:rgba(139,92,246,.45);border-radius:6px"></div><span style="font:400 10px Inter;color:#71717A">T</span></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:100%;height:28px;background:rgba(139,92,246,.35);border-radius:6px"></div><span style="font:400 10px Inter;color:#71717A">W</span></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:100%;height:60px;background:#8B5CF6;border-radius:6px"></div><span style="font:600 10px Inter;color:#A78BFA">T</span></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:100%;height:40px;background:rgba(139,92,246,.35);border-radius:6px"></div><span style="font:400 10px Inter;color:#71717A">F</span></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:100%;height:20px;background:rgba(139,92,246,.25);border-radius:6px"></div><span style="font:400 10px Inter;color:#71717A">S</span></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:100%;height:16px;background:rgba(139,92,246,.25);border-radius:6px"></div><span style="font:400 10px Inter;color:#71717A">S</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="fab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+        <div class="nav" style="background:rgba(25,25,38,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 30px rgba(0,0,0,.35)">
+          <div class="it" style="color:#A78BFA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>Home</div>
+          <div class="it" style="color:#71717A"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 3v4M16 3v4"/></svg>Calendar</div>
+          <div class="it" style="color:#71717A"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18"/><circle cx="17" cy="14.5" r="1.3" fill="currentColor" stroke="none"/></svg>Money</div>
+          <div class="it" style="color:#71717A"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l1.7 4.4L18 9l-4.3 1.6L12 15l-1.7-4.4L6 9l4.3-1.6z"/></svg>Savi</div>
+          <div class="it" style="color:#71717A"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>More</div>
+        </div>
+      </div></div>
+    </div>
+
+  </div>
+  <p class="dv-next">Try next: "build out the full flow for <a class="dv-oid" href="#1b">1b</a>" · "<a class="dv-oid" href="#1c">1c</a> layout but with <a class="dv-oid" href="#1d">1d</a>'s charts" · "show <a class="dv-oid" href="#1a">1a</a> in dark too" · "new directions for the hero number"</p>
+</section>
+
+<section class="dv-turn" id="t0">
+  <div class="dv-thd"><a class="dv-tid" href="#t0">0</a><span class="dv-tname">New feature proposal — Weekly Check-in</span></div>
+  <p class="dv-tsub">A calm Sunday ritual that fits Savi's "celebrate progress" ethos (§64): a 20-second weekly recap that reflects the week back, flags one thing worth noticing, and sets one intention. It gives the Savi Insight engine a recurring home and a reason to open the app when nothing is urgent.</p>
+  <div class="dv-opts">
+    <div class="dv-opt" id="0a">
+      <div class="dv-olabel"><a class="dv-oid" href="#0a">0a</a><span><b>Weekly Check-in · light.</b> Concept sketch. Tell me to pursue it or park it.</span></div>
+      <div class="ph"><div class="scr" style="background:radial-gradient(58% 40% at 10% 2%,rgba(139,92,246,.16),transparent 60%),radial-gradient(50% 32% at 98% 90%,rgba(6,182,212,.12),transparent 60%),#F6F7FB">
+        <div class="sb" style="color:#18181B"><span>9:41</span><span class="bars"><svg width="17" height="12" viewBox="0 0 17 12" fill="#18181B"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".35"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#18181B" stroke-width="1.6"><path d="M1 4.2C4.6 1 11.4 1 15 4.2M3.4 6.8c2.4-2 6.8-2 9.2 0M6 9.4c1.1-.9 2.9-.9 4 0"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#18181B" stroke-opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#18181B"/><rect x="22" y="4" width="1.6" height="4" rx="1" fill="#18181B" fill-opacity=".5"/></svg></span></div>
+        <div class="body" style="padding:4px 20px 0">
+          <div style="padding:10px 0 4px"><div style="font:600 12px Inter;letter-spacing:.06em;text-transform:uppercase;color:#7C3AED">Your week · Aug 9–15</div><div style="font:700 27px/1.15 'Plus Jakarta Sans';color:#18181B;margin-top:6px">Steady week, Alex.</div></div>
+          <!-- headline win -->
+          <div style="background:#EBE7F9;border:1px solid rgba(255,255,255,.6);border-radius:24px;padding:22px;margin-top:16px;box-shadow:0 8px 30px rgba(139,92,246,.15)">
+            <div style="font:400 13px Inter;color:#52525B">You saved</div>
+            <div style="font:800 40px/1 'Plus Jakarta Sans';letter-spacing:-1.5px;color:#065F46;margin:8px 0 4px">₱2,000</div>
+            <div style="font:500 14px Inter;color:#18181B">more than last week ✨</div>
+          </div>
+          <!-- 3 stat chips -->
+          <div style="display:flex;gap:10px;margin-top:14px">
+            <div style="flex:1;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:14px"><div style="font:400 11px Inter;color:#52525B">Spent</div><div style="font:700 17px 'Plus Jakarta Sans';color:#18181B;margin-top:3px">₱4,120</div></div>
+            <div style="flex:1;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:14px"><div style="font:400 11px Inter;color:#52525B">Bills paid</div><div style="font:700 17px 'Plus Jakarta Sans';color:#18181B;margin-top:3px">3 of 3</div></div>
+            <div style="flex:1;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:14px"><div style="font:400 11px Inter;color:#52525B">Tasks</div><div style="font:700 17px 'Plus Jakarta Sans';color:#18181B;margin-top:3px">8 done</div></div>
+          </div>
+          <!-- worth noticing -->
+          <div style="background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:20px;padding:18px;margin-top:14px">
+            <div style="font:600 12px Inter;letter-spacing:.05em;text-transform:uppercase;color:#92400E;margin-bottom:8px">Worth noticing</div>
+            <div style="font:500 15px/1.45 Inter;color:#18181B">Food was your biggest jump — ₱3,900, up 24%. Most of it was delivery on weeknights.</div>
+          </div>
+          <!-- set intention -->
+          <div style="margin-top:16px"><div style="font:600 15px Inter;color:#18181B;margin-bottom:10px">Set one intention for next week</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #7C3AED;border-radius:14px;padding:13px 15px"><span style="width:18px;height:18px;border-radius:9px;border:2px solid #7C3AED;background:#7C3AED;display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span style="font:500 14px Inter;color:#18181B">Cap delivery at ₱1,500</span></div>
+              <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.5);border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:13px 15px"><span style="width:18px;height:18px;border-radius:9px;border:2px solid #A1A1AA"></span><span style="font:500 14px Inter;color:#52525B">Move ₱2,000 to savings</span></div>
+            </div>
+          </div>
+          <div style="background:#7C3AED;border-radius:14px;padding:15px;text-align:center;margin-top:18px;box-shadow:0 8px 24px rgba(124,58,237,.3)"><span style="font:600 15px Inter;color:#fff">Start next week →</span></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <p class="dv-next">Try next: "pursue the Weekly Check-in — show me the entry point and a dark version" · "make it a 3-card swipe story instead" · "park this, focus on the dashboard"</p>
+</section>
+
+</x-dc>
+</body>
+</html>

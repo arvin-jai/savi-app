@@ -543,20 +543,31 @@ when each first appears.
 | `accounts` | 0.1 | `name`, `type`, `balance_minor`, `currency`, `is_default`, **`is_liability`** ([P1](#p1)) |
 | `categories` | 0.1 | Seeded from D§7; `user_id` null = system. **Drop "Bills"** ([P4](#p4)) |
 | `transactions` | 0.1 | The ledger. `type`, `classification`, `amount_minor`, **`transfer_group_id`** ([P3](#p3)) |
-| `bills` | 0.1 | `amount_minor`, `due_day`, `recurrence`, `category_id`, `account_id` |
+| `bills` | 0.1 | `amount_minor`, `due_day`, `recurrence`, `category_id`, `account_id`, plus **`interval_months` + `anchor_month`** (M15 — every 3/6/12 months) |
 | `bill_payments` | 0.1 | `bill_id`, `period`, `paid_at`, `transaction_id` |
-| `recurring_transactions` | 0.1 | Recurring salary and subscriptions — replaces the `income` table ([P2](#p2)) |
+| `recurring_transactions` | 0.1 | Recurring salary and subscriptions — replaces the `income` table ([P2](#p2)). **Generates from M16**; inert before that |
 | `calendar_events` | 0.2 | |
 | `tasks` | 0.2 | `title`, `description`, `due_date`, `priority`, `status` (P§17) |
-| `work_schedules` | 0.2 | Recurrence rule vs. generated events — decide at v0.2 |
-| `notifications` | 0.3 | |
-| `budgets` | 0.5 | P§24 waterfall |
+| `work_schedules` | 0.2 | ✅ M14 — **recurrence rule**, not generated events. Decision recorded in the migration |
+| `work_shift_exceptions` | 0.2 | ✅ M14 — **added.** One row per date the rule did not apply. "I swapped Tuesday" is what a mutable field cannot express |
+| `notification_preferences` | 0.3 | Per-type controls (P§26). Named `notifications` in the original plan |
+| `budgets` | 0.5 | P§24 waterfall. **No bills column** — bills stay derived |
 | `financial_goals` | 0.5 | P§25 |
 | `ai_conversations` | 0.4 | |
-| `ai_recommendations` | 0.5 | |
+| `ai_messages` | 0.4 | **Added** — user and assistant turns only; tool results are never persisted |
+| `ai_preferences` | 0.4 | **Added** — the off switch, enforced server-side ([AI-BOUNDARY §4](AI-BOUNDARY.md)) |
 | `ai_tool_grants` | 0.6 | **Added** — per-tool permission storage ([P8](#p8)) |
+| `ai_action_log` | 0.6 | **Added** — what the AI did and when the user confirmed it. Records failures too |
 
 `income` is deliberately absent — see [P2](#p2).
+
+**`ai_recommendations` was never built.** v0.5's insights are generated on demand and rendered
+straight into the existing `InsightCard`; nothing needed a table. It is not missing so much as
+unnecessary — add it only if insights ever need to be dismissed, ranked, or recalled later.
+
+**19 tables as built**, all with RLS and at least one policy — asserted schema-wide by the
+hardening suite rather than table by table, so a new table added without a policy fails the
+tests instead of shipping.
 
 `bill_payments` exists so "Mark as paid" is an **event**, not a mutable flag. That is what makes
 undo, payment history, and "how much have I actually paid this month" possible without a later
@@ -572,8 +583,13 @@ transactions
   classification    need | want | bill          ([P4](#p4)) expenses only
   category_id
   transfer_group_id pairs the two sides         ([P3](#p3))
+  recurring_transaction_id  set when generated  (M16)
   description · transaction_date · created_at
 ```
+
+`recurring_transaction_id` carries a **unique index with `transaction_date`**, which is what
+makes payday generation idempotent — see the M16 record. It is `ON DELETE SET NULL`: deleting
+a schedule keeps the money it already produced, because those pesos really did arrive.
 
 Full definition, constraints, and the transfer pairing rules:
 **[corrected P§14](#replacement-for-p14--transactions)**.
@@ -641,17 +657,31 @@ financial action without per-instance user confirmation.
 
 Version numbers follow **P§37** ([P5](#p5)). Phase numbers reference P§30.
 
-| Version | Milestone | P§30 Phase |
-| --- | --- | --- |
-| — | [M0 Feasibility spike](#m0--feasibility-spike) | — |
-| **v0.1** | [M1 Foundations](#m1--foundations--design-system) → [M5 Dashboard](#m5--dashboard--onboarding) | 1–4, 6 |
-| **v0.2** | [M6 Calendar & Tasks](#v02--m6--calendar--tasks) | 5 |
-| **v0.3** | [M7 Notifications](#v03--m7--notifications) | 9 |
-| **v0.4** | [M8 Ask Savi](#v04--m8--ask-savi-read-only) | 7 |
-| **v0.5** | [M9 AI Insights, Budgets & Goals](#v05--m9--ai-insights-budgets--goals) | 7 |
-| **v0.6** | [M10 AI Actions](#v06--m10--ai-actions) | 8 |
-| **v0.7** | [M11 Responsive web & hardening](#v07--m11--responsive-web--hardening) | 10 |
-| **v1.0** | [Public MVP](#v10--public-mvp) | — |
+> ### ⚠️ Milestone numbering — read this before citing an M-number
+>
+> This table was written before the build started and its numbers **drifted from
+> reality**. The a11y audit and the responsive-web pass were each recorded as their own
+> milestone (M6 and M7), which pushed every later number up by two.
+>
+> **The version ladder is authoritative. The M-numbers below are the ones the completion
+> records actually use**, reconciled on 2026-08-15 so the table and the records agree.
+> Anything citing an old number — "M8 Ask Savi", "M9 AI Insights" — means the *version*, not
+> the M-number.
+
+| Version | Milestone | P§30 Phase | Status |
+| --- | --- | --- | --- |
+| — | [M0 Feasibility spike](#m0--feasibility-spike) | — | ✅ |
+| **v0.1** | [M1 Foundations](#m1--foundations--design-system) → [M5 Dashboard](#m5--dashboard--onboarding) | 1–4, 6 | ✅ |
+| **v0.1 exit** | M6 Accessibility & dark-mode audit | — | ✅ |
+| **v0.7 (early)** | M7 Responsive web | 10 | ✅ — built out of order, see its record |
+| **v0.2** | [M8 Calendar & Tasks](#v02--m6--calendar--tasks) | 5 | ✅ |
+| **v0.3** | [M9 Notifications](#v03--m7--notifications) | 9 | ✅ |
+| **v0.4** | [M10 Ask Savi](#v04--m8--ask-savi-read-only) | 7 | ✅ |
+| **v0.5** | [M11 AI Insights, Budgets & Goals](#v05--m9--ai-insights-budgets--goals) | 7 | ✅ |
+| **v0.6** | [M12 AI Actions](#v06--m10--ai-actions) | 8 | ✅ |
+| **v0.7** | [M13 Hardening](#v07--m11--responsive-web--hardening) | 10 | ✅ |
+| **v0.2 (late)** | M14 work_schedules & week view | 5 | ✅ — deferred at v0.2, built 2026-08-15 |
+| **v1.0** | [Public MVP](#v10--public-mvp) | — | ⛔ blocked — see [RELEASE.md](RELEASE.md) |
 
 P§33's dependency order — auth → database → accounts → transactions → calculations → bills →
 calendar → tasks → dashboard → notifications → AI → AI actions — is preserved throughout, with
@@ -710,6 +740,35 @@ not survive discovering it during M5.
 verified on Android **and** web. This route stays in the repo permanently — it is how every
 later component gets reviewed.
 
+> ### ✅ M1 complete — record written retrospectively 2026-08-15
+>
+> **This record was missing.** M2–M14 each have one; M1 did not, despite being plainly built —
+> `theme/tokens.ts`, `ThemeProvider`, every primitive, `GlassCard`, `lib/money.ts`, and
+> `/dev/kitchen-sink` all exist and are used by everything after it. PIPELINE's definition of
+> done requires the record, so the plan was out of compliance with itself. Reconstructed here
+> from the code rather than from memory, and marked as retrospective rather than presented as
+> contemporaneous.
+>
+> Delivered: tokens with light and dark defined together from the first commit; `ThemeProvider`
+> + `useTheme` so theme is never a component prop ([R13](DESIGN-REVIEW.md#r13)); primitives in
+> every state plus `Toast`, `Skeleton`, `EmptyState`; `GlassCard` with D§55's API minus `theme`
+> ([A14](DESIGN-SYSTEM.md)); the gap tokens (focus ring, z-index scale, easing and
+> reduced-motion map, bottom-nav inset) that [A15](DESIGN-SYSTEM.md) specified; and
+> `lib/money.ts` with `formatMoney()`, unit-tested.
+>
+> The blocking design findings were resolved into tokens here as planned — R1/A2's usage split,
+> R7/A8's `brand.action`, R9/A10's border alpha, R11/A12's category palette.
+>
+> **[A2b](DESIGN-SYSTEM.md#24-financial-colors-6) was discovered during this milestone**, and is
+> the finding worth keeping: the semantic text colours passed against the flat background and
+> **failed over glass**, with bill text measuring 4.48:1. The shipping values are one step
+> darker. That is [A4](DESIGN-SYSTEM.md#glass-fallback) doing its job — measuring against the
+> flat background is optimistic by enough to fail.
+>
+> **Two M1 items were left open and are only now closed** (see the risk register): the glass
+> fallback colours were computed rather than sampled (risk 13), and the category palette was
+> never run through a colourblindness simulator (risk 12). Both were closed on 2026-08-15.
+
 ### M2 — Authentication & database
 
 *P§30 Phases 1–2*
@@ -720,6 +779,29 @@ later component gets reviewed.
 
 **Done when:** sign up on a physical device, kill the app, reopen, still signed in. A second
 account **cannot** read the first's rows — verified by query.
+
+> ### ✅ M2 complete — verified 2026-08-14
+>
+> 6 migrations, 7 tables, RLS + policies + grants on each. `npm run db:test` runs
+> `supabase/tests/rls_and_engine.sql` against the local stack: **22 checks, all passing** —
+> two-user isolation in both directions, transfer pairing, the [P3](#p3) regression
+> (₱5,000 to savings is *not* ₱5,000 spent), liability exclusion, and the [P1](#p1)
+> Available Money formula.
+>
+> Signup verified end to end on web: account created → profile trigger fired with
+> `display_name` → guard redirected → `financial_summary` RPC returned through PostgREST
+> with RLS applied → session survived a reload with no bounce to login.
+>
+> **Finding: RLS without GRANT is a dead table.** The first test run failed with
+> `permission denied for table accounts`. Policies and grants are two independent gates —
+> `GRANT` decides whether the role may touch the table, the policy decides which rows. The
+> migration set now pairs them explicitly in `20260813000600_grants.sql`, granting only the
+> verbs each table has a policy for. Worth knowing which way this fails: a missing grant is
+> loud and fixed in minutes; a grant without RLS is silent and is a breach.
+>
+> **Local stack note:** `analytics`, `storage`, and `studio` are disabled in `config.toml`.
+> All three failed their health checks on this machine and took the whole stack down with
+> them; none is needed for v0.1.
 
 ### M3 — Accounts & transactions
 
@@ -740,6 +822,60 @@ account **cannot** read the first's rows — verified by query.
 does **not** appear as an expense; the whole flow works in airplane mode and reconciles on
 reconnect.
 
+> ### ✅ M3 complete — verified 2026-08-14
+>
+> Accounts CRUD, Quick Add with progressive disclosure, grouped transaction list, edit and
+> delete. Exercised end to end against the live stack: Available ₱27,871 → add ₱350 → ₱27,521,
+> delete → back. **Expenses read ₱430 with a ₱5,000 transfer in the ledger** — [P3](#p3) holds
+> in the running app, not just in the SQL suite.
+>
+> Smart defaults (P§61) infer from the user's own history first, keyword map second, and always
+> show the guess as correctable: `Meralco` → Bill, `Starbucks` → Want, `Jeepney` → Need.
+>
+> **Three bugs found by running it:**
+>
+> 1. **UTC date.** `new Date().toISOString().slice(0,10)` in the API layer — the exact bug
+>    `lib/dates.ts` was written to prevent, one file over. In Manila (UTC+8) anything logged
+>    before 8am would be filed to the previous day. Now uses `todayISO()`. Note the column
+>    default is also UTC `current_date`, so the client must always send the date explicitly.
+> 2. **FlashList dropped new rows to the bottom.** Its recycler diffed a reordered array as an
+>    append: a just-added transaction rendered last, with no day header, and only moved under
+>    "Today" on reload — from the user's side, their entry vanished. Fixed by keying the list on
+>    the newest transaction id plus the row count. Keying on `rows[0]` is *not* enough: that is
+>    a day header and does not change when a second transaction joins an existing day.
+> 3. **Opening balances must be transactions.** Writing `balance_minor` directly would create a
+>    balance no row explains, and every later reconciliation would be off by exactly that
+>    amount. `useCreateAccount` records it as an income transaction instead.
+>
+> **Deferred to M4:** offline behaviour is specified in the query layer (stale-while-revalidate,
+> cached data plus a banner, no mutation retries so a ledger cannot double-write) but has **not
+> been exercised in airplane mode**. That half of the DoD is still outstanding.
+>
+> ### ✅ Offline reconciliation — finally exercised 2026-08-15
+>
+> Open since M3. Tested by cutting the network at `fetch` (every Supabase call rejecting with
+> `TypeError: Failed to fetch`, which is how a dead connection fails — not a clean HTTP error).
+>
+> **It found a real bug, and a bad one.** Every mutation reported **"Not signed in"** while
+> offline. `supabase.auth.getUser()` asks the *server* who the token belongs to; with no network
+> it rejects, and 17 call sites read "no user" as "signed out". A finance app telling someone
+> they have been logged out because their train went into a tunnel is alarming, and it is the
+> same shape as M9's black screen — an unreachable backend reported as a broken app.
+>
+> Fixed with `requireUserId()` / `currentUserId()` in `lib/supabase.ts`, built on
+> `getSession()`, which reads the persisted session locally and only touches the network when
+> the token actually needs refreshing. All 17 call sites converted.
+>
+> After the fix, the behaviour is what the query layer always claimed:
+>
+> - Cached data keeps rendering; no blank screen, no spinner.
+> - A mutation fails with *"Could not mark that as paid"* — honest, and about the right thing.
+> - The bill does **not** optimistically flip to paid, so nothing has to be walked back.
+> - On reconnect the same action succeeds and the undo toast appears.
+> - **Exactly one `bill_payments` row and one transaction after three attempts** (two failed
+>   offline, one succeeded). `retry: 0` on mutations holds — the ledger did not double-write,
+>   which was the whole reason for that setting.
+
 ### M4 — Bills
 
 *P§30 Phase 4*
@@ -752,6 +888,28 @@ reconnect.
 
 **Done when:** a bill due tomorrow renders amber with "Due tomorrow"; marking it paid turns it
 green, writes the transaction, and can be undone from the toast.
+
+> ### ✅ M4 complete — verified 2026-08-14
+>
+> The DoD verbatim: Internet ₱1,699 renders amber, "Due soon · Due tomorrow"; Mark as paid
+> flips it green, writes a `classification = 'bill'` transaction linked to the payment row, and
+> the toast's Undo removes **both** leaving no orphan.
+>
+> Scheduling is pure and unit-tested (16 cases), including the calendar edge that matters:
+> a bill due on the **31st clamps to Feb 28/29** rather than rolling into March. Rolling would
+> mean February had no electricity bill at all — understating Upcoming Bills and *overstating*
+> Available Money.
+>
+> **Bug found by running it — orphaned transaction on undo.** `markBillPaid` returned the
+> payment row from its first insert, before the `transaction_id` link was written. The toast's
+> undo closure therefore held `transaction_id: null`, skipped the transaction delete, and left
+> the money gone from the account with nothing marking it as a bill payment — precisely the
+> outcome the function's own comment warned against. Now returns the linked row, and rolls back
+> both sides if the link write fails.
+>
+> **Dashboard hierarchy corrected.** Income/Expenses (Level 5) had been rendering *above*
+> Upcoming (Level 2), against D§26's "do not put charts above the most important information."
+> Upcoming now sits directly under Available, where it explains the "after ₱1,699" caption.
 
 ### M5 — Dashboard & onboarding
 
@@ -782,6 +940,37 @@ voice rules, and gives v0.4 a UI to plug a model into rather than one to invent.
 **Done when:** the dashboard matches D§71 on Android, all data live, nothing mocked, and the
 Level 3 slot is genuinely absent rather than an empty card.
 
+> ### ✅ M5 complete — verified 2026-08-14
+>
+> Five-tab glass nav (A13), dashboard in strict D§26 order, InsightCard with the D§65 glow,
+> and P§34 onboarding. Level 3 is genuinely omitted, not stubbed.
+>
+> Onboarding verified end to end from an empty database: account → income → bill → dashboard
+> reading **Available ₱22,801** (₱24,500 opening − ₱1,699 bill) with "Internet · Due tomorrow"
+> in Upcoming and the matching insight. All three writes landed (`accounts=1 bills=1
+> recurring=1`).
+>
+> **Insight rules are deterministic and tested** (14 cases): cash-flow shortfall → overdue →
+> due-soon → spending change → welcome → quiet encouragement, first match wins. Two gates keep
+> the spending rule honest — a 20% floor and a ₱500 base — because "300% higher" on a ₱60 base
+> is true and useless, which is the alarm D§63 forbids. The comparison is month-to-date vs the
+> **same day-range** last month; comparing 14 days against last month's full 31 would tell every
+> user their spending had dropped.
+>
+> **Bug: `router.replace('/')` silently no-ops.** There is no root index route — the only index
+> lives inside `(tabs)` — so the call navigated nowhere, left the screen mounted, and threw
+> nothing. Onboarding appeared to reset to step 1 while its data had in fact saved. Fixed via
+> `lib/routes.ts` (`HOME = '/(tabs)'`).
+>
+> Expo Router's typed-route generator is also emitting junk in this project — `/../lib/supabase`
+> and a path inside `supabase/.temp/` appear among "valid" hrefs, while the grouped index gets
+> no bare `/` alias. The cast is confined to `lib/routes.ts` rather than disabling `typedRoutes`
+> globally.
+>
+> **Nav clearance corrected:** `scrollBottomInset` was `navHeight + 16`, which ignored that the
+> bar *floats* — the last row slid under it. Now `navHeight + 12 + 24`, with a matching
+> `fabBottomOffset`.
+
 ### v0.1 exit — accessibility & dark mode audit
 
 Dark mode has been built all along; this is where it gets audited, **not retrofitted**.
@@ -791,6 +980,69 @@ Dark mode has been built all along; this is where it gets audited, **not retrofi
 - 44×44px touch targets — check D§32 rows and D§35 dots specifically.
 - TalkBack across the whole app; amounts announced as words, not glyphs.
 - Reduced motion honored via the M1 map. Dynamic type at 200%.
+
+> ### ✅ M6 complete — verified 2026-08-14 *(with one gap)*
+>
+> Settings screen (Profile · Appearance · Currency · Data · About), theme preference persisted
+> to AsyncStorage, and reduced motion honoured — the skeleton shimmer becomes a static block,
+> the toast keeps its fade but drops the translate.
+>
+> **Contrast: 0 failures across every screen in both themes**, measured on the rendered DOM
+> (Dashboard, Money, Bills, Accounts, Settings). Touch targets: 0 failures. No unlabelled
+> controls.
+>
+> **Bug: React Navigation's screen container is not theme-aware.** Every tab screen sat on
+> `#f2f2f2` — a light grey — *inside* our dark root. AmbientBackground covers it, so it never
+> appeared in a screenshot, but it would flash light during transitions and overscroll in dark
+> mode. Fixed with `sceneStyle` on the Tabs navigator.
+>
+> **Audit methodology, recorded because the wrong method looked authoritative.** The first
+> three passes produced ~20 phantom failures: React Navigation keeps inactive tab screens
+> *mounted*, so the probe measured one screen's text against another's background. Neither
+> `display` checks nor `checkVisibility()` excluded them. What worked was auditing each route
+> on a **fresh page load** with a viewport-rect filter.
+>
+> **Gap:** dynamic type at 200% and a real TalkBack pass are **not** done — both need a device.
+>
+> ### ✅ Dynamic type at 200% — measured 2026-08-15 (TalkBack still outstanding)
+>
+> Every rendered font size doubled on a 375×812 viewport, which is what an OS text-size setting
+> does on native — `allowFontScaling` is left at its RN default of `true` everywhere, verified
+> by grep, so nothing in Savi opts out of it.
+>
+> Result: **no horizontal overflow** (document width 375 = viewport width 375) and **no layout
+> break**. Financial amounts did not clip, which is the [A15](DESIGN-SYSTEM.md) rule that
+> actually matters — `₱1,234,567.89` in a mobile card was the stated risk.
+>
+> One element truncates: the bill name, via `numberOfLines={1}`, which renders as an ellipsis
+> rather than a hard cut. That is A15's documented behaviour for long values, not a defect.
+>
+> **TalkBack is still not done** and still needs a device. Note what this test does *not* cover:
+> it measures layout under scaled text, not whether a screen reader announces things sensibly.
+
+---
+
+## v0.7 — M7 — Responsive web
+
+> ### ✅ M7 complete — verified 2026-08-14
+>
+> `useBreakpoint` per D§45, glass sidebar at ≥1024px (D§28) replacing the bottom nav, 1200px
+> max content width, per-breakpoint page padding. Verified at **375 / 768 / 1440**: zero
+> contrast failures, zero touch-target failures, no horizontal overflow at any width.
+>
+> Tablet keeps the bottom nav deliberately — a 768px portrait tablet does not have the
+> horizontal room a 240px sidebar needs, so it gains a second column instead.
+>
+> **Bug: no focus rings anywhere.** D§44 requires keyboard navigation and A15 specified a ring
+> on every control; the `focused` flag in RN Web's Pressable style callback was not firing, so
+> every element measured as having no outline. Replaced with a global `:focus-visible` rule —
+> which is the better mechanism regardless, because the browser's own heuristic distinguishes
+> keyboard focus from a mouse click and the JS flag cannot. Confirmed with a real Tab keypress:
+> `2px solid #7C3AED`.
+>
+> `src/global.css` was also **not imported at all** — the file that imported it was deleted
+> during the M1 template cleanup, so no global CSS had been active since. It now also carries
+> `prefers-reduced-transparency` (A4) and a `prefers-reduced-motion` backstop.
 
 ---
 
@@ -810,6 +1062,295 @@ Dark mode has been built all along; this is where it gets audited, **not retrofi
 **This is the milestone where Savi becomes Savi.** v0.1 is a competent expense tracker; the
 money↔time connection (P§35) is what makes it a different product.
 
+> ### ✅ M8 complete — verified 2026-08-14
+>
+> Calendar with month grid + agenda, tasks under More, Quick Add's full five options (P§9),
+> and **dashboard Level 3 activated** — the slot held genuinely empty since M5.
+>
+> **Money entries on the calendar are derived, never stored.** A bill's due date comes from the
+> bill; a payday from the recurring income schedule. Copying them into `calendar_events` would
+> let the calendar disagree with the ledger, and the ledger is the thing that has to be right.
+> Verified live: Aug 15 shows two dots (green payday + amber bill) without a single calendar
+> row existing for either.
+>
+> Bill projection reuses M4's `dueDateInMonth`, so the 31st→Feb-28 clamp is identical in both
+> places — one rule, one implementation. 18 timeline tests cover it, including a Jan 28 → Mar 3
+> range that a naive +30-day loop would skip February in.
+>
+> **Bug: query key collision crashed the dashboard.** `useRecurringIncomeSchedule` reused
+> `['insights','recurring-income']` — a key already owned by `useInsight`, whose query returns
+> a summed **number** while this one returns an **array**. Same key, two shapes, last writer
+> wins: the timeline tried to iterate a number and threw `recurringIncome is not iterable`.
+> It only appeared on the dashboard, the one screen where both hooks mount together; the
+> calendar alone worked fine. Fixed with a distinct key, and `useCreateRecurringIncome` now
+> invalidates both.
+>
+> 86 JS tests · 23 money-engine checks · 9 calendar/tasks checks.
+>
+> **Still open:** work_schedules (P§28) is unbuilt — recurring shifts need a recurrence-rule vs
+> generated-events decision that v0.2 does not force. Week view is also not built; month +
+> agenda covers the P§16 use case and Week can follow demand.
+>
+> ### ✅ M14 — both closed 2026-08-15
+>
+> **The deferred decision, taken: a recurrence RULE, not generated events.**
+>
+> Generated events need a horizon and a job to extend it; get the horizon wrong and someone's
+> calendar is simply empty next March with nothing to say why. A rule has no horizon — it is
+> evaluated for whatever range the calendar is showing. It also matches how everything else in
+> Savi already works: a bill's due date is computed from `due_day`, and calendar money is
+> derived rather than copied (M8). A generated shift would have been the first stored copy of a
+> rule in this codebase, and copies drift.
+>
+> **Exceptions are rows, not edits.** "I swapped Tuesday" is the case that breaks every
+> recurring-event model: a mutable field forces you to either change every Tuesday forever or
+> fork the series. `work_shift_exceptions` says what happened to exactly one date and leaves
+> the rule intact — the same shape as `bill_payments` being an event rather than a flag.
+>
+> Shifts join the timeline as a fifth kind, sorted after money and before events: a shift frames
+> the day, but money has a deadline the user cannot move. Verified live — a Mon–Fri schedule
+> populates weekdays and leaves weekends empty, with no rows generated anywhere.
+>
+> **Week view** completes D§67's Month · Week · Agenda. Seven columns with a money summary
+> above them, which is what makes it worth having over the month grid: *"Coming in ₱30,000"*
+> beside the days it lands on is the money+time claim at the scale people actually plan at.
+>
+> #### Bug found by the test suite — a CHECK constraint that accepted anything
+>
+> `array_length(days_of_week, 1) between 1 and 7` **accepted an empty array**. `array_length`
+> returns NULL for an empty array, not 0, and a CHECK constraint passes when its expression is
+> NULL — only FALSE fails. A schedule that ran on no days at all was storable. Fixed with
+> `coalesce(..., 0)`. Written the obvious way, the constraint did nothing.
+>
+> 18 shift tests · 12 week tests · 15 DB checks.
+>
+> ### ✅ M15 — two fixes from real use, 2026-08-15
+>
+> Both reported by running the app, and the first is a good example of why the
+> report and the diagnosis can differ.
+>
+> **1. "Pay from shows both Cash instead of the account name."** The code was
+> already rendering `a.name`. The user genuinely had *two accounts both named
+> "Cash"* (₱30,000 and ₱1,000), so the picker was faithful and useless. Nothing
+> stops someone naming two accounts the same, and they reasonably might — a
+> wallet and a jar. Fixed with `accountLabel()`, which shows the name alone when
+> unique and appends the balance only when it collides: no clutter in the common
+> case, no ambiguity in the case that matters. Applied to all three account
+> pickers, including the transfer destination, which disambiguates against the
+> *full* list rather than the filtered one — otherwise hiding the source account
+> could make a duplicate look unique in one picker while it is ambiguous in
+> another. The user's data was left alone at their request.
+>
+> **2. Bills that recur every 3, 6 or 12 months.** The form hardcoded
+> `recurrence: 'monthly'` with no way to change it.
+>
+> The design decision worth recording: **an interval needs an anchor.** "Every 3
+> months" is not a schedule — a quarterly bill anchored in February falls
+> Feb/May/Aug/Nov, one anchored in January falls Jan/Apr/Jul/Oct. Without an
+> anchor the engine has to guess, and it would guess differently in SQL than in
+> the app. So `bills` gains `interval_months` *and* `anchor_month`, with a
+> constraint refusing any non-monthly bill that lacks one.
+>
+> The rule now exists in **three** places — `bill_occurs_in_month()` in SQL,
+> `billOccursInMonth()` in the app, `billOccursIn()` in the Edge Function mirror
+> — because all three project bills independently. The two TS copies are held by
+> the existing contract test; the SQL one by the hardening suite. Getting this
+> wrong in any of them would count a quarterly bill in the two months it is not
+> due, overstating Upcoming Bills and **understating Available Money every
+> month** — the dashboard's headline figure.
+>
+> Backward compatible by construction: every existing bill defaults to
+> `interval_months = 1`, for which the anchor is irrelevant. The 16 original
+> scheduling tests pass unchanged.
+>
+> Verified live: a quarterly bill anchored in August contributes ₱5,000 to
+> August and November and **nothing to September** — confirmed against
+> `upcoming_bills_minor()` month by month.
+>
+> 369 JS tests · 110 DB checks.
+>
+> ### ✅ M16 — recurring income generates, and things can be deleted, 2026-08-15
+>
+> **1. Income arrives monthly now.** Since v0.1 a `recurring_transactions` row
+> had been inert: onboarding wrote the salary and payday, `next_run` was set
+> once, and *nothing ever read it*. A user with a ₱30,000 salary saw ₱0 income
+> every month. The v0.1 comment said the generation cron "arrives with
+> notifications (v0.3)"; v0.3 shipped without it and nobody noticed, because the
+> figure it produced — zero — looks exactly like a user who has not been paid.
+>
+> `generate_due_recurring()` materialises every occurrence due on or before
+> today and advances `next_run`. Called on dashboard mount.
+>
+> **The property that matters is idempotency**, because this runs on every app
+> open — "called twice" is the normal case, not the edge case, and the thing it
+> creates is income. Two salaries from a double-mounted screen would be a
+> corrupted ledger with no way for the user to tell which was real. It is
+> guaranteed by a **unique index on (schedule, date)**, so a duplicate is
+> physically impossible rather than merely unlikely: a client-side
+> read-modify-write on `next_run` would have been a race with money at the end
+> of it. Verified by rewinding `next_run` and re-running — the index refuses.
+>
+> Two smaller decisions worth keeping: generation is **bounded at 12 periods per
+> call**, so a schedule left dormant for years cannot manufacture a decade of
+> salary on first open; and the payday **re-clamps** each month, so a 31st
+> payday lands on Feb 28 and then *returns* to the 31st rather than drifting
+> there permanently. Deleting a schedule sets `recurring_transaction_id` to null
+> rather than cascading — those pesos really did arrive, and a ledger that
+> forgets them because you tidied a schedule is wrong.
+>
+> **2. Bills and accounts can be deleted.** Both hooks existed; neither was
+> wired to a screen.
+>
+> The one that needed care is accounts: `transactions.account_id` is **ON DELETE
+> CASCADE**, so a plain delete button would silently erase every transaction in
+> the account and rewrite every historical total. The confirmation therefore
+> *names the number* — "Delete account and 4 transactions" — and offers
+> **Archive instead — keeps history** as the primary action, because "I stopped
+> using this account" is not the same statement as "this money never existed".
+> An account with no transactions just deletes.
+>
+> Deleting a bill is milder and the asymmetry is worth knowing: it cascades to
+> `bill_payments` (which months were settled) but **not** to the transactions
+> those payments created, because that FK is `ON DELETE SET NULL` in the other
+> direction. Deleting a bill forgets the schedule, not the spending — verified
+> live: bills 4 → 3, transactions unchanged at 4.
+>
+> #### Bug found by the test suite — a partial index needs its predicate repeated
+>
+> `ON CONFLICT (recurring_transaction_id, transaction_date) DO NOTHING` failed
+> with *"there is no unique or exclusion constraint matching the ON CONFLICT
+> specification"*. The unique index is **partial** (`WHERE ... IS NOT NULL`), and
+> Postgres will not infer a partial index unless the predicate is repeated in the
+> `ON CONFLICT` clause. The index was correct; the insert could not see it.
+>
+> 9 new DB checks (119 total).
+>
+> ### ✅ M17 — the Hero Focus redesign applied, 2026-08-15
+>
+> All five main screens rebuilt from `docs/design_handoff_dashboard_flow/`, using the existing
+> primitives and **no new tokens** — the handoff's own constraint, and it held.
+>
+> **Home** carries the change that matters: the Available card is now the hero, with a balance
+> sparkline inside it and the trend folded into the existing A1 caption rather than added as a
+> second line. The two income/expense summary cards became one `SplitBar`, because the
+> *relationship* is the point and two separate numbers make the reader compute it. Bills moved
+> from a vertical stack to a swipeable row with dot pagination, which stops three bills pushing
+> the insight below the fold.
+>
+> **The sparkline shows balance, not Available Money**, and the difference is deliberate.
+> Available is `Balance − Upcoming Bills`, and the bills half is a statement about *now* — there
+> is no honest historical value for it. Balance is exactly derivable by walking today's figure
+> backwards through the ledger, so that is what the line draws. The deduction stays where it was
+> already true: the caption under the number.
+>
+> **Calendar** gained a `WeekStrip`; **Money** gained an Available strip and a horizontal
+> accounts row; **More** became icon rows with a profile header and a Tasks count.
+>
+> **Ask Savi** got the bubble shapes and the composer. The user's words are now brand-filled and
+> right-aligned with the square corner bottom-right; Savi's answer keeps its glass card and
+> mirrors the tail bottom-left. The D§30 Answer→Reason→Action shaping was already there from M10
+> and was not touched — `message.ts` still does it.
+>
+> The composer became one pill holding the field and a circular send button, which is why this
+> screen has no FAB: the input bar *is* D§62's one obvious action. It is built from `TextInput`
+> rather than from `Input`, because `Input` owns its own border, radius and 50px height and
+> nesting it would have drawn a rounded rectangle inside a pill.
+>
+> Two measurements changed the design as drawn. The reference's send button is **34px**, below
+> A15's 44px floor for what is the screen's primary action — the circle is 44, making the bar 6px
+> taller than the HTML. And an empty field rendered the pill **82px tall**: RN Web turns
+> `multiline` into a `<textarea>` that takes its default *two* rows, so `numberOfLines={1}` is
+> load-bearing here rather than cosmetic.
+>
+> #### The D§44 deviation was taken, and recorded as A17
+>
+> The bottom nav is icon-only. This is the handoff's one deliberate departure from the design
+> system, and it is a real accessibility trade rather than an oversight — a first-time user who
+> does not recognise an icon no longer has a word to read. It is accepted because the five
+> destinations are conventional and every screen states its own name immediately below the nav.
+> Four things now carry what the label did; see
+> [A17](DESIGN-SYSTEM.md#amendment-a17--the-bottom-nav-is-icon-only).
+>
+> #### Three bugs found by measuring rather than looking
+>
+> 1. **The sparkline rendered 40px wide inside a 341px card.** `width="100%"` on `<Svg>` becomes
+>    an *attribute* on RN Web's real `<svg>`, and an SVG with a percentage width attribute and no
+>    CSS width falls back to intrinsic sizing. Both the prop and `style={{ width: '100%' }}` are
+>    needed — native reads the prop, the DOM reads the style. An `onLayout` measuring version was
+>    written first, and removed once measurement showed `onLayout` never fired here; dead code
+>    that looks load-bearing is worse than none.
+> 2. **`aria-selected` was absent from every nav tab.** `accessibilityState={{ selected }}`
+>    produced no DOM attribute, so "which tab am I on" was invisible to assistive tech — the
+>    exact mitigation A17 leans on now the label is gone. Fixed by passing `aria-selected`
+>    explicitly alongside the state prop.
+> 3. **The Tasks count badge was hidden from screen readers.** It was marked
+>    `accessibilityElementsHidden` on the theory that the row's accessibility label included it;
+>    `GlassCard` has no such prop, so the count would have been a sighted-only signal.
+>
+> #### One simplification against my own earlier work
+>
+> M14's seven-column `WeekView` was dropped from week mode. With the strip above it, the same
+> seven days were rendered twice — once as a row, once as columns behind a horizontal scroll.
+> The strip answers "where am I in the week" and the agenda answers "what is on this day"; the
+> columns answered neither better. The component is kept and still tested, because it is the
+> obvious tablet/desktop layout where the horizontal room actually exists.
+>
+> **Verified:** 0 contrast failures and 0 touch-target failures across Home, Calendar (week),
+> Money and Ask Savi, in **both themes**, measured on the rendered DOM with the M6 compositing
+> auditor. On Ask Savi the auditor also confirmed white on the send button's `brandRole.action`
+> at **5.70:1** — the same pair the user bubble uses, and the exact value A3 records.
+>
+> One reported touch-target failure was a false positive worth naming: the disclosure's `sm`
+> button measures 40px, which is deliberate and already covered by `hitSlop` at
+> [Button.tsx:119](../src/components/ui/Button.tsx). A DOM auditor cannot see `hitSlop`, so that
+> row will appear on every future run of it.
+>
+> 385 JS tests (16 new, on the balance-trend arithmetic).
+
+> ### ✅ M18 — account lifecycle reaches recurring schedules, 2026-08-15
+>
+> Reported from use: *"when I deleted the Cash account, there is still Salary Event added in the
+> Calendar."*
+>
+> The report was a stale cache, and pulling on it found two worse things behind it. All three are
+> the same defect — **the account lifecycle stopped at the ledger and never reached the schedules
+> that pay into it.**
+>
+> **1. The reported one.** `recurring_transactions.account_id` is `ON DELETE CASCADE`, so the
+> salary schedule was already gone from the database — but `useDeleteAccount` invalidated
+> accounts, transactions, summary and bills, and neither of the two queries that read that table.
+> The calendar kept drawing a payday that no longer existed until a cold reload. Both keys are
+> needed: the calendar and the dashboard read the same rows in different shapes under different
+> keys, which is itself a hazard already documented at `qkCalendar.recurringIncomeSchedule`.
+>
+> **2. The confirmation was lying by omission.** The delete sheet counted transactions and said
+> nothing about schedules. So "Delete account and 41 transactions" read as a complete account of
+> the damage while quietly also deleting the payday — and the user would find out next month,
+> when no income arrived. `useAccountTransactionCount` became `useAccountDeletionImpact`, and the
+> sheet now names the schedules separately from the transaction count, because the two are
+> different kinds of loss: one rewrites the past, the other stops the future.
+>
+> **3. The worst one, which nobody had reported.** `generate_due_recurring()` filtered on
+> `recurring_transactions.archived_at` and never looked at the account. **Archiving** an account
+> therefore hid it from every list while its salary kept landing in it every month — the balance
+> growing where the user could not see it, Total Income climbing, Available Money moving for a
+> reason that had vanished from the UI. Archiving is the option Savi *recommends* instead of
+> deleting; it cannot mean "hidden but still manufacturing money". Migration
+> `20260815000600_recurring_respects_archive.sql` joins `accounts` and requires it live. Only
+> future generation stops — everything already generated stays, which is the whole promise of
+> archiving.
+>
+> Both client queries got the matching `accounts!inner(archived_at)` filter, because the database
+> and the UI have to agree about this or the calendar draws income that will never arrive.
+>
+> **Verified:** 2 new DB checks (121 across eight suites) covering both directions — an archived
+> account generates nothing, and un-archiving resumes, since archiving is reversible and stopping
+> must be too. The PostgREST embed was then measured against the running API with a temporary
+> fixture, archived and live, because `!inner` silently returning everything is exactly the
+> failure a typecheck cannot see. 385 JS tests unchanged.
+>
+> **Not device-verified.** Web and database only.
+
 ---
 
 ## v0.3 — M7 — Notifications
@@ -822,6 +1363,111 @@ money↔time connection (P§35) is what makes it a different product.
 - Bill · task · schedule · budget · income reminders (P§26).
 - **Per-category user controls.** P§26 says "avoid excessive notifications" — that needs a
   settings screen, not just restraint.
+
+> ### ✅ M9 complete — verified 2026-08-14 *(device test outstanding)*
+>
+> **Architectural change: local scheduling, not push.** [P6](#p6) assumed FCM plus a `pg_cron`
+> job. Neither is needed for anything Savi currently sends. Every reminder here is derivable
+> from data the device already has — a bill due on the 15th does not need a server to announce
+> it — and `expo-notifications` schedules locally, firing with the app closed.
+>
+> That removes the FCM project, the push credentials, and the server-side scheduler from v0.3
+> entirely, and the result is strictly better: reminders work with no signal, and **no due-date
+> data leaves the phone**. Push becomes warranted only when the server knows something the
+> device cannot — server-generated AI insights at v0.5 — and that is when to add it.
+>
+> Preferences seeded per user by trigger, with **bills ON and everything else OFF**: P§3's core
+> user is someone who forgets payment dates, so that reminder is the product, while an app that
+> starts noisy gets muted before it earns the right to speak.
+>
+> 19 scheduling tests. The rules that matter: a paid bill never reminds (which is why bill
+> status is derived from `bill_payments` rather than a flag), nothing is ever scheduled in the
+> past, and the reconciler **diffs** rather than clear-and-rebuild — recreating a notification
+> can re-surface it on Android, so editing one bill would otherwise re-notify the user about
+> another they had already seen.
+>
+> Permission is requested only from an explicit toggle, never on launch: Android 13+ shows the
+> POST_NOTIFICATIONS dialog once, and a decline is permanent until the user visits system
+> settings. Web degrades to an honest "reminders work on the Android app" message.
+>
+> 105 JS tests · 23 money-engine checks · 11 calendar/tasks/prefs checks.
+>
+> **✅ Android black screen — diagnosed and fixed.**
+>
+> Not `expo-notifications`, and not the native rebuild. `AuthGate` was stuck in `initialising`
+> forever because `supabase.auth.getSession()` never settled: the emulator's `127.0.0.1:54321`
+> resolves to the *emulator*, not the host, so the local Supabase was unreachable. Every signal
+> pointed at the rebuild — new native module, fresh prebuild, black screen — and all of that was
+> a coincidence of timing.
+>
+> Two fixes:
+>
+> 1. **Environment.** `adb reverse tcp:54321 tcp:54321` (or point `EXPO_PUBLIC_SUPABASE_URL` at
+>    `10.0.2.2`). The app rendered correctly the moment the port was forwarded.
+> 2. **Product — the real bug.** An unreachable backend hung the app on a blank screen
+>    indefinitely, with no message and no way out. `getSession()` now runs against an 8s
+>    timeout and falls through to the signed-out UI, where a sign-in attempt surfaces a proper
+>    network error via `authErrorMessage`. This would have hit any user whose connection dropped
+>    at launch, not just an emulator.
+>
+>    **✅ Verified on device (2026-08-14)** under the real failure condition — Supabase not
+>    merely unreachable but not running at all. The app mounts, waits, and lands on Welcome
+>    instead of hanging.
+>
+>    The window is deliberately generous, because the timeout trades one failure for a milder
+>    one: on a *slow* connection it shows Welcome and then snaps to the dashboard when the
+>    session finally arrives — the flicker `AuthProvider`'s header exists to prevent. 8s sits
+>    well beyond any plausible success, and `onAuthStateChange` is what recovers the late
+>    session; without that listener a slow restore would silently sign the user out.
+>
+> **Add `adb reverse tcp:54321 tcp:54321` to the Android dev setup** alongside the Metro port.
+>
+> **Still outstanding for M9:**
+>
+> `expo-notifications` is a native module, so the dev client needed `prebuild` + a full
+> rebuild. That rebuild succeeded and the module is present:
+>
+> - `POST_NOTIFICATIONS` and `RECEIVE_BOOT_COMPLETED` are in the **merged** manifest (arriving
+>   via the library's own manifest merge — no config plugin required)
+> - Metro bundles cleanly: **3559 modules**, so the import resolves
+> - The app process runs, `MainActivity` holds focus, and `ReactNativeJS: Running "main"` is
+>   logged — the JS root registers
+> - **No JS error appears in logcat at all**
+>
+> The app now renders correctly on Android — Welcome screen with the ambient gradient,
+> confirmed on the emulator after the port forward.
+>
+> **✅ A reminder was observed firing on device (2026-08-14).** Signed in, granted
+> `POST_NOTIFICATIONS`, and a bill due that day produced:
+>
+> ```
+> RTC_WAKEUP Alarm{com.anonymous.Savi}
+>   tag=*walarm*:expo.modules.notifications.NOTIFICATION_EVENT
+>   origWhen=2026-08-14 13:48:00.000     ← exactly the computed fire time
+> ```
+>
+> …which then posted `Savi • Internet / ₱1,699 is due today.` — the exact copy
+> `planNotifications` generates, delivered `SILENT` with `sound=null` on the `reminders`
+> channel. **v0.3 is closed.**
+>
+> ### Two native-only bugs found by finally running the app on a device
+>
+> Both were invisible on web and passed every unit test.
+>
+> **1. `transform: undefined` crashed every button press.** React Native registers
+> `processTransform` as a style processor for the `transform` **key**, and it runs whenever the
+> key is present — `undefined` flattens to `null` on Fabric and the processor calls
+> `.forEach` on it. `react-native-web` has no such processor. Every `Button` in the app threw
+> `Cannot read property 'forEach' of null` the instant it was pressed. Fixed by spreading the
+> key in only when there is a real array (`...(pressed ? { transform: [...] } : null)`), in
+> `Button` and the `Toast`.
+>
+> **2. A fresh install told users to go to system settings.** `getPermissionsAsync()` reports
+> `status: 'denied'` for a permission that has never been requested, and the settings screen
+> branched on `status` alone — so a first run showed "Reminders are turned off for Savi in your
+> phone's settings" instead of the button that would have worked. **`canAskAgain` is the field
+> that matters**, not `status`; the API now returns a three-state snapshot
+> (`granted` / `askable` / `blocked`).
 
 ---
 
@@ -840,6 +1486,101 @@ money↔time connection (P§35) is what makes it a different product.
 - **Data boundary decision, documented before any code:** what reaches the model, what stays
   server-side, what the user is told, and how they turn it off.
 
+> ### ✅ M10 complete — verified 2026-08-14 *(model round-trip and device test outstanding)*
+>
+> **The boundary was written first**, as [P8](#p8) requires — [AI-BOUNDARY.md](AI-BOUNDARY.md)
+> exists before a line of Edge Function code, and it is now the fifth authoritative document.
+> It answers the four questions that are cheap to decide and expensive to retrofit: what
+> reaches the model (§1), what never leaves the server (§2), what the user is told (§3), and
+> how they switch it off (§4) — plus the permission (§5) and injection (§6) posture.
+>
+> The one sentence it all reduces to: **the model is handed a small, computed, de-identified
+> summary and can only read.** It cannot reach the database, cannot do arithmetic, and cannot
+> take an action.
+>
+> Built: the `ai-assistant` Edge Function (OpenAI tool calling), `ai_conversations` ·
+> `ai_messages` · `ai_preferences` with RLS, six read-only tools, the chat UI on the Savi tab,
+> and the Settings disclosure + off switch.
+>
+> **RLS is the enforcement, not a `where` clause.** The function builds its Supabase client
+> from the *caller's JWT*, never the service role key, so every tool query runs as that user
+> and the database refuses cross-user reads before they return. Using the service role would
+> have made each tool's filter the only thing between one user and another's ledger — and
+> [P3](#p3) is this codebase's standing lesson about filters someone has to remember.
+>
+> **`get_financial_goals` is deliberately absent.** P§22 lists it, but `financial_goals` is a
+> v0.5 table. A tool that returns a plausible empty answer for data that does not exist teaches
+> the model to invent, so it does not ship until the data is real.
+>
+> #### The architectural problem this milestone had to solve
+>
+> The Edge Function runs in **Deno** and cannot resolve `@/lib/money` or
+> `@/features/bills/schedule`. But "one `formatMoney()`" and "one due-date rule" are load-bearing
+> invariants — the 31st→Feb-28 clamp exists because rolling into March understates Upcoming
+> Bills and therefore *overstates* Available Money.
+>
+> Copying them across the boundary is a drift bug with a delay fuse. The resolution is
+> **contract tests**: `money.ts` and the scheduling helpers in `tools.ts` are explicit mirrors,
+> and `tools.test.ts` runs both implementations over the same table of cases — zero minor
+> parts, exact thousands, negatives, leap years, the Feb clamp. If either side drifts, `npm
+> test` fails. The invariant is held by a gate rather than by a comment asking people to be
+> careful.
+>
+> #### Bug found by running it — the guard order was wrong
+>
+> The first cut checked `OPENAI_API_KEY` *before* identity and consent. Nothing leaked, but the
+> ordering made the §4 guarantee untestable: a user who had switched Ask Savi off was told
+> "not configured" rather than being refused, and in any environment without a key the 403
+> path could never be observed at all. Configuration is an operator problem and now answers
+> last. Verified against the running function:
+>
+> ```text
+> no Authorization header          → 401  "You need to be signed in to ask Savi."
+> authenticated, Ask Savi OFF      → 403  "Ask Savi is switched off…"
+> authenticated, ON, no API key    → 503  "Savi's assistant isn't configured yet."
+> ```
+>
+> The 503 also fires *before* the conversation is created, so a failed request leaves no orphan
+> thread — confirmed by query: `convos=0 msgs=0` after a failed ask.
+>
+> #### Verified on web
+>
+> Onboarding from an empty database → Available **₱22,801** (₱24,500 − ₱1,699). The Savi tab
+> renders the disclosure, the four suggestions, and the composer; switching Ask Savi off in
+> Settings persists to the database and the tab falls back to the deterministic InsightCard
+> with an honest empty state. **Turning the assistant off costs the conversation, not the
+> intelligence** — `computeInsight()` never left the device to begin with, which is why M5 built
+> the rules engine before the model.
+>
+> The client's error surfacing was verified against a real failure: the 503 reaches the user as
+> *"Savi's assistant isn't configured yet."*, not "Edge Function returned a non-2xx status
+> code", and the typed question is handed back rather than lost.
+>
+> Layout was checked by **measuring the DOM, not by reading a screenshot** — the capture made
+> the composer look confined to the top third of the page, while `getBoundingClientRect` showed
+> header 0–36, thread 72–618, composer 627–675 inside a 720px viewport. The screenshot was the
+> unreliable instrument, which is the M6 lesson in a different costume. One real fix did come
+> out of it: the pinned composer had hardcoded the mobile nav clearance, leaving a hole under
+> the input on desktop where the sidebar replaces the bar.
+>
+> 196 JS tests · 22 money-engine checks · 11 calendar/tasks/prefs checks · 12 AI checks.
+>
+> **Still outstanding for M10:**
+>
+> - **No model round trip has happened.** There is no `OPENAI_API_KEY` in this environment, so
+>   every guard *up to* the OpenAI call is verified and the call itself is not. The tool loop,
+>   the tool results the model actually receives, and the D§30 shape of a real reply are
+>   unexercised.
+> - **Device gate not run.** Three consecutive milestones shipped native-only bugs that passed
+>   every automated gate ([PIPELINE](PIPELINE.md)), and this milestone adds a `KeyboardAvoidingView`
+>   and a pinned composer — precisely the kind of surface that behaves differently on Android.
+> - **`index.ts` is outside `npm run typecheck`** (Deno globals and `npm:` specifiers). It is
+>   covered by `npx deno check` instead, which is run and clean, but that is a second command
+>   someone has to remember rather than part of the ladder.
+> - **Prompt-injection testing is not done.** The posture is right — read-only tools mean there
+>   is nothing to hijack — but P§30 Phase 10's actual injection pass belongs with v0.6's write
+>   tools and has not been performed.
+
 ---
 
 ## v0.5 — M9 — AI Insights, Budgets & Goals
@@ -852,6 +1593,142 @@ money↔time connection (P§35) is what makes it a different product.
 - Budget waterfall (P§24): Income → Bills → Needs → Wants → Savings. Depends on clean
   classification ([P4](#p4)).
 - Savings goals (P§25) with progress bars (D§39) and recommended monthly contributions.
+
+> ### ✅ M11 complete — verified 2026-08-15 *(model round-trip still outstanding)*
+>
+> Budgets, goals, `generate-insights`, and two more read-only tools.
+>
+> **Bills stay derived in the budget too.** `budgets` has no bills column — the check is
+> asserted by the DB suite, not just intended. Bills come first in the waterfall and are not an
+> allocation the user chooses: you do not "budget" ₱1,699 for internet, the internet bill *is*
+> ₱1,699. Storing it would let the plan disagree with the ledger, the same failure the calendar
+> avoids by deriving its money entries (M8).
+>
+> **Saving is not spending, and it needed its own aggregate.** Actual savings cannot come from
+> the classification split, because a transfer into savings is `type = 'transfer'` and is
+> structurally excluded from expense totals ([P3](#p3)). `saved_to_savings_minor()` measures
+> transfers into savings accounts **net of transfers back out** — ₱5,000 in and ₱2,000 out reads
+> as ₱3,000 saved, verified in SQL.
+>
+> **`get_financial_goals` finally joined the tool registry**, along with `get_budget`. It was
+> deliberately absent at v0.4 because the table did not exist; a tool that returns a plausible
+> empty answer for missing data teaches the model to invent. Eight read tools now, all still
+> reads — asserted by a test that every registered name starts with `get_`.
+>
+> **The insight card graduates without changing.** `generate-insights` returns the same
+> `Insight` shape M5's rules produce, so the component was untouched. The rules remain the
+> fallback whenever AI is off, unconfigured, or unreachable — which is why M5 built them first,
+> and why they are not dead code.
+>
+> The insight schema gives the model an explicit **`say_nothing`** option, because M5's rules
+> can return null and a model asked to "produce an insight" always produces one. An empty card
+> beats a hollow one.
+>
+> #### Bug found by running it — "tracking within your plan" with no plan
+>
+> The no-plan headline checked `every step planned === 0`, but the derived bills step carries a
+> real figure, so any user with one bill and no budget was told they were *"tracking within your
+> plan"* — within a plan they had never set. The check now ignores derived steps. The unit test
+> had passed because its fixture used zero bills; there is now a case with bills present and
+> nothing allocated.
+>
+> #### A fix that came from a wrong assertion, not wrong code
+>
+> `monthsUntil` originally rounded any partial month up, so "₱50,000 by December" from August
+> counted five months. Four is what a person means by that, and it is the count that makes the
+> recommendation land on the target. Verified live: ₱50,000 goal, ₱18,000 saved, target
+> 2026-12-20 → **"About ₱8,000 a month … 4 months to go"**, and the card reads ₱50,000 /
+> ₱18,000 saved / 36% — D§39's example exactly.
+>
+> 250 JS tests · 14 new DB checks.
+
+---
+
+## v0.6 — M12 — AI Actions
+
+> ### ✅ M12 complete — verified 2026-08-15 *(model round-trip still outstanding)*
+>
+> Three write tools — `create_task`, `create_reminder`, `create_calendar_event` — behind two
+> server-side gates.
+>
+> **Gate 1: the grant.** `ai_tool_grants`, per user per tool, absence meaning denied. There is
+> no `granted boolean` defaulting true and no seed row, so the natural failure mode of every
+> query is refusal. Ungranted tools are not offered to the model at all, so it cannot propose
+> something the user would then have to decline.
+>
+> **Gate 2: the confirmation.** A granted tool call is **not executed**. It is validated, turned
+> into a plain-language sentence, and returned as a *proposal*; the write happens only on a
+> second request carrying the user's approval. The grant is re-checked and the arguments
+> re-validated at that point — a revocation between proposing and tapping wins, and the server
+> does not take the client's word for what it agreed to write.
+>
+> **The money guard is a check constraint.** P§31's *"never, at any version"* is written into
+> the schema: `ai_tool_grants.tool_name` accepts only the three creates, so the database refuses
+> to store a permission for `move_money`, `create_transaction`, `delete_transaction` or anything
+> else — even if application code asked it to. Eleven forbidden names are asserted in SQL and
+> again in JS.
+>
+> `ai_action_log` records what ran and when it was confirmed, including **failures** — an action
+> a user approved that then failed is exactly the thing worth being able to see. Append-only by
+> grant.
+>
+> #### Bug found by running it — the schema was right and the client was wrong
+>
+> Toggling a permission returned **403** and silently did nothing. `.upsert()` compiles to
+> `INSERT ... ON CONFLICT DO UPDATE`, which needs UPDATE privilege — and this table deliberately
+> has none, because a grant either exists or it does not and a mutable `granted = false` row is
+> a second way to say the same thing that some query eventually forgets to check. Fixed by using
+> a plain insert and swallowing the unique violation for idempotency. **The 403 was the design
+> working.**
+>
+> #### Also found: a stale Metro bundle, not a missing icon
+>
+> `PieChart is not defined` appeared at runtime while typecheck passed. The import was correct
+> on disk — Metro had hot-reloaded the intermediate state between the edit that *used* the icon
+> and the edit that *imported* it. Worth knowing before spending time on a library-version
+> theory: check the file, then reload.
+>
+> 287 JS tests (37 of them on the action validator alone) · 13 new DB checks.
+
+---
+
+## v0.7 — M13 — Hardening
+
+> ### ✅ M13 complete — verified 2026-08-15
+>
+> P§30 Phase 10 executed rather than asserted — `supabase/tests/hardening.sql`, 22 checks:
+> multiple accounts, transfers across three of them, refunds, recurring bills, partial payments,
+> negative Available Money, negative account balances, currency columns, full isolation.
+>
+> **Two of these are schema-wide invariants**, which is what makes them worth more than the
+> scenarios:
+>
+> - **Every money column is an integer type.** The suite queries `information_schema` and fails
+>   if any `%_minor` / `%amount%` / `%balance%` column is not `bigint` or `integer`. Risk 4 in
+>   [Part 7](#part-7--risk-register) can now only regress loudly.
+> - **RLS is on with at least one policy, on every public table.** A new table added later
+>   without a policy fails this suite instead of shipping. Both halves of the M2 lesson are
+>   covered: RLS without a policy makes a table unreachable, a grant without RLS is a breach.
+>
+> Findings worth recording:
+>
+> - **A refund is income, and must not net off the expense.** "Expenses net of refunds" would
+>   make the summary disagree with the transaction list the user can see. Verified: ₱1,500 spent
+>   and ₱1,500 refunded leaves Expenses at ₱1,500, Income at ₱1,500, and the account at zero.
+> - **Paying a bill settles one period, not the bill.** Paying August leaves September's
+>   Upcoming Bills untouched — asserted, because a payment that marked the bill paid forever
+>   would understate Upcoming Bills and *overstate* Available Money every month after.
+> - **Negative is a real state**, for both Available Money (D§26 A1) and an account balance.
+>   Flooring either at zero would hide an overdraft.
+>
+> Responsive web was already done in M7. Prompt injection and tool permissions are covered in
+> JS, where the decision is made.
+>
+> **AI key security verified by grep:** `OPENAI_API_KEY` appears nowhere in `src/`,
+> `service_role` nowhere in `supabase/functions/`, and the only `EXPO_PUBLIC_*` secret-shaped
+> variable is the anon key, which is designed to be public.
+>
+> 296 JS tests · 90 DB checks across six suites.
 
 ---
 
@@ -918,8 +1795,8 @@ the v0.4 AI layer underneath it, which is why it can't come earlier.
 | 9 | Prompt injection via user text | Unauthorized tool calls | Text is data; read-only default; [P8](#p8) |
 | 10 | Scope creep from P§8 / P§32 | v0.1 never ships | [P5](#p5) — P§37's ladder is the contract |
 | 11 | ~~Notifications underscoped~~ | Core user need unmet | ✅ Bill reminders promoted to P0, delivery specified |
-| 12 | **Category palette not colorblind-tested** | Nine hues, tight fuchsia/purple pair | Simulator check before v0.1 ships ([A12](DESIGN-SYSTEM.md#25-category-colors-7)) |
-| 13 | **Glass fallback colors are computed, not measured** | Contrast baseline could be optimistic | Verify against the real ambient gradient in M1 |
+| 12 | ~~Category palette not colorblind-tested~~ | Nine hues, tight fuchsia/purple pair | ✅ **Tested 2026-08-15 — and it fails, as would any palette.** Ceiling is ΔE 7.08; nine categories do not fit a dichromatic plane. Closed by making the dot never load-bearing ([A16](DESIGN-SYSTEM.md#amendment-a16--the-simulator-check-was-run-and-the-palette-cannot-pass)) |
+| 13 | ~~Glass fallback colors are computed, not measured~~ | Contrast baseline could be optimistic | ✅ **Measured 2026-08-15** by rasterising the shipped ambient SVG. Tokens are **conservative in both themes** — every text pair measures higher contrast against the real composite than against the token. Worst pair 6.38:1 vs a 4.5:1 requirement |
 
 **Every specification-level risk is now closed.** What remains in this table is
 implementation risk — code that has to be written and verified, not decisions still pending.

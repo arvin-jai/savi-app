@@ -37,6 +37,8 @@
 > | A13 | Navigation unified — **five tabs**, Tasks under More | §27, §67 | [R12](DESIGN-REVIEW.md#r12) |
 > | A14 | `theme` prop removed from `GlassCard` | §55 | [R13](DESIGN-REVIEW.md#r13) |
 > | A15 | **Undefined states specified** — focus, layering, toast, easing, offline, overflow | §44 | [Review gaps](DESIGN-REVIEW.md#specification-gaps) |
+> | A16 | Colourblindness check run: **no nine-colour palette can pass**; the dot is never load-bearing | §7 | [BUILD-PLAN risk 12](BUILD-PLAN.md#part-7--risk-register) |
+> | A17 | **Bottom nav is icon-only** — a deliberate §44 deviation, with the mitigations that replace the label | §27, §44 | Hero Focus design handoff |
 >
 > Every ⚠️ callout from v1.0 has been resolved. Amendments are marked inline where they apply.
 
@@ -227,7 +229,30 @@ Measured contrast of the text variants on `#F6F7FB`:
 | `#B91C1C` danger dark | 6.06:1 | ✅ |
 
 Dark mode needed no change — its values already pass. **This was a light-mode defect only.**
-§47 gains `#F87171` for danger, which v1.0 omitted.
+§47 gains `#F87171` for danger and `#60A5FA` for info, which v1.0 omitted.
+
+### Amendment A2b — text values darkened one further step
+
+**Measured during M1 implementation, not predicted.** The values above pass against the *flat*
+background `#F6F7FB`, but real text sits on a glass card with an ambient orb behind it (§11),
+and that composite costs roughly 1.5 points. An automated audit of the rendered kitchen-sink
+DOM measured `#B45309` bill text at **4.48:1** — below the threshold.
+
+The shipping text values are one step darker:
+
+| Semantic | §6 `Dark` | **Shipping** | Flat ratio |
+| --- | --- | --- | --- |
+| income | `#047857` | **`#065F46`** | 7.18:1 |
+| expense | `#C2410C` | **`#9A3412`** | 6.83:1 |
+| bill | `#B45309` ❌ over glass | **`#92400E`** | 6.62:1 |
+| danger | `#B91C1C` | **`#991B1B`** | 7.76:1 |
+| info | `#1D4ED8` | **`#1E40AF`** | 8.14:1 |
+
+After the change: **0 failures across 129 text nodes in both themes**, worst passing pair
+4.98:1. Implemented in `src/theme/tokens.ts`.
+
+This is [A4](#glass-fallback) doing its job. Measuring against the flat background — as v1.0
+implicitly did — is optimistic by enough to fail.
 
 ---
 
@@ -280,6 +305,52 @@ Personal).
   **Validate this palette against a colorblindness simulator** (deuteranopia and protanopia)
   before it ships, and rely on the label rather than the dot for anything load-bearing.
 
+### Amendment A16 — the simulator check was run, and the palette cannot pass
+
+**Measured 2026-08-15**, closing [BUILD-PLAN risk 12](BUILD-PLAN.md#part-7--risk-register).
+Implemented as `src/theme/colorVision.ts` with a permanent test, not a one-off inspection.
+
+Dichromacy simulation (Viénot LMS) plus CIE76 ΔE across protanopia, deuteranopia and
+tritanopia, in both themes. Roughly **ΔE 15** is the line for *"these are telling me different
+things at a glance"*.
+
+| Theme | protanopia | deuteranopia | tritanopia |
+| --- | --- | --- | --- |
+| Light | 7.7 | 7.7 | 7.9 |
+| Dark | **3.2** | 3.9 | 4.9 |
+
+**A12's prediction was wrong about which pair.** It named fuchsia/purple
+(shopping/entertainment). The actual tightest is **entertainment/work** — purple against
+indigo — at ΔE 3.2 in dark protanopia.
+
+**No replacement palette passes either.** Searching 19 candidate hues for the best possible
+nine, the ceiling is **ΔE 7.08**. Nine categories do not fit in a dichromatic plane, and
+removing the eight reserved values makes it harder. A constrained search preserving the
+semantic hues reached 6.11 — better than 3.24, still failing, and it costs transport its blue.
+The unconstrained optimum was worse in the way that matters: it chose `#C2410C` and `#047857`,
+the expense and income *text* colours, recreating exactly the collision [R11](DESIGN-REVIEW.md#r11)
+removed.
+
+### What this changes
+
+**Nothing about the palette, and everything about what may depend on it.**
+
+The hues stay as A12 set them, because the property they were chosen for — never colliding with
+financial or brand meaning — is achievable, and is the one that actually helps a user
+understand what they are looking at. Trading it for a margin that still fails is a bad trade.
+
+**The dot is therefore never load-bearing, and that is now a rule rather than a preference:**
+
+- Category colour appears only as a dot or chip beside the category **name** (§7 rules, unchanged).
+- Every component that renders one carries the label: `TransactionItem` puts the category name
+  in both the visible meta line and the accessibility label; `Chip` requires `label` and takes
+  `dotColor` as optional decoration.
+- **A category dot must never be the only signal** — the same rule §44 already applies to
+  financial state (`Green + "On track"`), now stated explicitly for categories too.
+
+The test suite keeps the two achievable properties: no reserved-value collision, and separation
+that can never regress below what was measured.
+
 ---
 
 # Part 3 — Glass
@@ -298,6 +369,36 @@ Glass components should have four main properties: **Transparency · Blur · Bor
 > **Amendment A10.** The light border was `0.65` in v1.0, conflicting with `0.60` in §19 and
 > §24 and with the per-level scale in §53. **§53 is authoritative**; the border alpha is
 > `0.50 / 0.60 / 0.70` by glass level, and the value above is the default level.
+
+<a id="m0-findings"></a>
+
+### M0 spike results — measured 2026-08-13
+
+Run on the built dev APK (Expo SDK 57 / RN 0.86.2), `/dev/glass-spike`, 50 glass cards in a
+`FlatList` over the ambient background.
+
+| Question | Verdict |
+| --- | --- |
+| **R6** — is `boxShadow` available on Android? | ✅ **Yes.** RN 0.86 New Architecture. The `boxShadow` swatch renders a soft wide shadow visibly distinct from the harder `elevation` swatch. **The tinted shadow language holds on Android** — the `elevation` fallback in §21 is not needed. |
+| **R3** — is the no-blur fallback acceptable? | ✅ **Yes.** Cards read as clearly distinct surfaces with legible text and soft shadows. Fallback-first is not a visual compromise. |
+| **R5** — does blur hold 60fps in a list? | ❌ **No — A6 confirmed.** |
+
+**R5 detail.** Measured on an emulator, which caps at ~30fps and is *not* a valid source for
+absolute figures — M0 asks for a mid-range physical device and that measurement is still
+outstanding. But two findings are platform-level and do not depend on the hardware:
+
+- **Min FPS halved: 24 → 14** with blur on. A 42% relative degradation on flagship-class
+  hardware.
+- **A rendering artifact disqualifies it regardless of speed.** With
+  `experimentalBlurMethod="dimezisBlurView"`, each card gains a hard-edged lighter rectangle
+  inset from its bounds — the blur layer does not respect the border radius. It looks broken,
+  not blurred.
+
+**Conclusion:** A6 stands as written. The solid fallback is the baseline; blur is reserved for
+the bottom nav, modals, sheets, and the dashboard hero — bounded, non-scrolling surfaces —
+and is never applied inside a list.
+
+---
 
 ### Amendment A6 — blur is progressive enhancement
 
@@ -1047,6 +1148,32 @@ despite having a full screen group and a desktop dashboard slot.
 **Content clearance.** A 72–80px floating nav plus a 56px FAB (§23) sit over scrolling content.
 Every scrollable screen adds bottom padding of `nav height + 16px + safe-area inset`, or the
 last row of every list sits underneath the nav.
+
+### Amendment A17 — the bottom nav is icon-only
+
+**Applied 2026-08-15** from the Hero Focus design handoff. This is the one place that handoff
+deviates from the design system, and it does so **deliberately** — recorded here rather than
+left as a discrepancy someone later "fixes".
+
+§44 requires *icon plus label* and says the active state must not rest on colour alone. The
+labels are now gone from the screen. What that costs and what replaces it:
+
+| §44's concern | How it is met without the label |
+| --- | --- |
+| Screen reader users | `accessibilityLabel` is unchanged on every tab — **nothing is lost here**, the label was never the mechanism |
+| "Which tab am I on?" announced | `accessibilityState.selected`, which is what assistive tech actually reads. The visible label never conveyed selection |
+| Not colour alone | Three simultaneous cues: brand colour, a heavier stroke (2.4 vs 2), and a tinted pill behind the active icon. Any two can fail and the state still reads |
+| 44×44 touch target | The row grew to compensate — an icon alone is smaller than an icon over a label, so `minHeight` is now explicit |
+
+**What is genuinely lost:** a first-time user who does not recognise an icon no longer has a
+word to read. That is a real cost, and it is the reason this is an amendment rather than a
+silent edit. It is accepted because the five destinations are conventional (home, calendar,
+wallet, sparkle, menu), the set is fixed at five, and every screen states its own name in an
+`h1` immediately below the nav — so the answer to "where am I?" is on screen, just not in the
+bar.
+
+**If this is ever reverted**, the labels come back and this amendment is struck; do not keep a
+half-version where some tabs have labels and others do not.
 
 ---
 

@@ -2,6 +2,11 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "types": ["jest"],
+    // The Edge Function's pure layer (tools.ts, money.ts, prompt.ts) uses Deno's
+    // explicit .ts import specifiers. Permitting them here keeps that layer —
+    // and its tests — inside `npm run typecheck` rather than excluded wholesale.
+    "allowImportingTsExtensions": true,
     "paths": {
       "@/*": [
         "./src/*"
@@ -16,5 +21,16 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
+  ],
+  "exclude": [
+    // Deno runtime: `Deno.env`, `Deno.serve` and `npm:` specifiers are not
+    // resolvable by the app's TypeScript config. Only this one file needs the
+    // Deno globals — the logic worth typechecking lives beside it in tools.ts,
+    // money.ts and prompt.ts, which stay included above.
+    //
+    // Typecheck them with:
+    //   npx deno check supabase/functions/*/index.ts
+    "supabase/functions/ai-assistant/index.ts",
+    "supabase/functions/generate-insights/index.ts"
   ]
 }
