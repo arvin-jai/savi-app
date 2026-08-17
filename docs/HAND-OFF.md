@@ -86,9 +86,11 @@ charts* means they need a reason to exist beyond looking good. The budget screen
 | — | M17 Hero Focus redesign | ✅ All five screens rebuilt; nav icon-only per [A17](DESIGN-SYSTEM.md) |
 | — | M18 Account lifecycle → schedules | ✅ From real use: deleting/archiving an account now reaches its paydays |
 | — | M19 First Android install — 5 reports | ⚠️ Built, **not device-verified**, and 4 of the 5 are device-only questions |
+| — | M20 Screen lock · shortcuts · More/Settings split | ⚠️ Built, **not device-verified**; the lock is almost entirely a device question |
+| — | M21 A18 reverted · nav shadow dropped | ⚠️ Built, **not device-verified** — and A18 is itself the cautionary tale |
 | v1.0 | Public MVP | ⛔ **Blocked** — see [RELEASE.md](RELEASE.md) |
 
-**Totals:** 393 unit tests · 121 DB checks across eight suites · 15 migrations · 19 tables
+**Totals:** 420 unit tests · 121 DB checks across eight suites · 15 migrations · 19 tables
 (all with RLS, 70 policies) · 17 SQL functions · 2 Edge Functions. Typecheck and `deno check`
 clean.
 
@@ -119,16 +121,18 @@ src/
 ├── app/              Expo Router routes
 │   ├── (auth)/       welcome · login · signup · forgot-password
 │   ├── (tabs)/       index(dashboard) · calendar · money · savi · more
-│   └── dev/          kitchen-sink · glass-spike   ← keep these
+│   ├── dev/          kitchen-sink · glass-spike   ← keep these; __DEV__-only in More
+│   └── profile.tsx   reached from the More user card, NOT from Settings (A23)
 ├── components/
-│   ├── ui/           Button · Input · Text · controls · feedback
+│   ├── ui/           Button · Input · Text · controls · feedback · Celebration
 │   ├── glass/        GlassCard · GlassSheet · GlassNavbar · GlassSidebar
 │   └── domain/       TransactionItem · BillCard · InsightCard · SplitBar ·
 │                     BillsThisWeek
 ├── features/         accounts · ai · auth · bills · budgets · calendar ·
-│                     goals · insights · notifications · transactions
+│                     goals · insights · notifications · security · transactions
 │                     (each owns its api.ts + pure logic + screens)
-├── lib/              supabase · money · dates · queryClient · routes · crashReport
+├── lib/              supabase · money · dates · queryClient · routes · crashReport ·
+│                     haptics
 └── theme/            tokens.ts (single source of truth) · ThemeProvider · colorVision
 supabase/
 ├── migrations/       15 files, ordered
@@ -140,8 +144,11 @@ supabase/
 ```
 
 **The rule that keeps this clean:** pure logic lives in its own file with unit tests
-(`schedule.ts`, `timeline.ts`, `rules.ts`, `infer.ts`, `money.ts`, `dates.ts`); `api.ts` does
-I/O only; screens compose. Every hard-won correctness decision is in the pure layer where it
+(`schedule.ts`, `timeline.ts`, `rules.ts`, `infer.ts`, `money.ts`, `dates.ts`, `spend.ts`,
+`security/pin.ts`); `api.ts` does I/O only; screens compose. `security/` is the clearest recent
+case: `pin.ts` is length rules and lockout arithmetic with no keychain in sight, `store.ts` is
+the keychain — so the security *decisions* are testable on CI and only the plumbing needs a
+phone. Every hard-won correctness decision is in the pure layer where it
 can be tested without a device.
 
 ---
@@ -253,13 +260,23 @@ while web was fine.
   the largest single unknown in the codebase.**
 - **No device pass since v0.3.** v0.4–v0.7 plus M14 ran on web only, and that stretch added a
   `KeyboardAvoidingView`, a pinned composer, and six screens.
-- **All of M19 is unverified on a device, and most of it can only be verified there.** Android
-  translucency ([A18](DESIGN-SYSTEM.md)), the haptics, and whether `Celebration`'s 2.6s hold and
-  burst read as rewarding rather than as an interruption are all things `react-native-web` will
-  happily lie about — which is precisely how the Android glass shipped missing in the first
-  place. The onboarding double-entry fix needs a genuinely fresh sign-up against the hosted
-  project, not a reload. **A new build is required regardless: `expo-haptics` is a native
-  module.**
+- **All of M19 is unverified on a device, and most of it can only be verified there.** The
+  haptics, and whether `Celebration`'s 2.6s hold and burst read as rewarding rather than as an
+  interruption, are things `react-native-web` will happily lie about. The onboarding
+  double-entry fix needs a genuinely fresh sign-up against the hosted project, not a reload.
+  **A new build is required regardless: `expo-haptics` is a native module.**
+  *(M19's Android translucency was A18 and has since been reverted — see
+  [A24](DESIGN-SYSTEM.md). It is the clearest example on record of why this list exists: it
+  passed every gate, read fine on web, and looked wrong the moment it was on a phone.)*
+- **The screen lock has never run on a device, and it is the kind of feature that only exists
+  there.** `expo-secure-store` has no web implementation, so `isLockSupported()` is false on web
+  and the entire feature switches itself off — meaning the web gate proves the code compiles and
+  nothing else. What needs a phone: the keychain round trip, the biometric prompt (and its
+  cancel path falling back to the pad), the 30-second grace measured across a real
+  backgrounding, and the 60-second lockout timer. The pure layer — length rule, weak-PIN
+  rejections, lockout arithmetic — is unit-tested and is not the risk.
+  **Do not ship this without unlocking a real phone with it, including getting the PIN wrong
+  five times.** A lock that fails open is a lie and a lock that fails closed is a brick.
 - **Real Android blur is still unmeasured.** `ANDROID_BLUR` in
   [GlassCard.tsx](../src/components/glass/GlassCard.tsx) is a one-line flip to `true` that turns
   on `dimezisBlurView` for the nav and any card asking for blur. It is off because M0 measured

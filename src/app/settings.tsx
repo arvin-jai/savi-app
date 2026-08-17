@@ -23,8 +23,8 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { useBills } from '@/features/bills/api';
 import { useProfile } from '@/features/insights/api';
 import { NotificationSettings } from '@/features/notifications/NotificationSettings';
+import { SecuritySettings } from '@/features/security/SecuritySettings';
 import { useTransactions } from '@/features/transactions/api';
-import { supabase } from '@/lib/supabase';
 import { useTheme, type ThemePreference } from '@/theme/ThemeProvider';
 import { layout, space } from '@/theme/tokens';
 import { useBreakpoint, useScrollBottomInset } from '@/theme/useBreakpoint';
@@ -39,26 +39,13 @@ export default function Settings() {
   const { pagePadding } = useBreakpoint();
   const bottomInset = useScrollBottomInset();
   const theme = useTheme();
-  const { user, signOut } = useAuth();
+  const { signOut } = useAuth();
   const { data: profile } = useProfile();
   const { data: accounts = [] } = useAccounts();
   const { data: bills = [] } = useBills();
   const { data: transactions = [] } = useTransactions();
 
-  const [displayName, setDisplayName] = useState(profile?.display_name ?? '');
   const [toast, setToast] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-
-  async function saveName() {
-    if (!user) return;
-    setSaving(true);
-    const { error } = await supabase
-      .from('profiles')
-      .update({ display_name: displayName.trim() || null })
-      .eq('id', user.id);
-    setSaving(false);
-    setToast(error ? 'Could not save that' : 'Name updated');
-  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -76,14 +63,11 @@ export default function Settings() {
         >
           <ScreenHeader title="Settings" />
 
-          {/* ── Profile ─────────────────────────────────────────────── */}
-          <Section title="Profile">
-            <Input label="Name" value={displayName} onChangeText={setDisplayName} />
-            <Text variant="caption" tone="secondary">
-              {user?.email}
-            </Text>
-            <Button label="Save" size="sm" loading={saving} onPress={saveName} />
-          </Section>
+          {/* Profile lived here and no longer does. It is reached by tapping
+              your own card at the top of More, which is where a person looks
+              for their own name — having it in both places meant two routes to
+              one form and a Settings screen that opened on something most
+              people never change. */}
 
           {/* ── Appearance ──────────────────────────────────────────── */}
           <Section title="Appearance">
@@ -136,10 +120,13 @@ export default function Settings() {
             <AiSettings />
           </Section>
 
+          {/* ── Screen lock ─────────────────────────────────────────── */}
+          <Section title="Security">
+            <SecuritySettings />
+          </Section>
+
           {/* ── Not yet ─────────────────────────────────────────────── */}
           <Section title="Coming later">
-            <Row label="Security & PIN" value="Not yet" muted />
-            <Divider />
             <Row label="Export data" value="Not yet" muted />
           </Section>
 

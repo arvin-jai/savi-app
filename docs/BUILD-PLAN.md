@@ -1368,8 +1368,13 @@ money↔time connection (P§35) is what makes it a different product.
 > ([GlassCard.tsx](../src/components/glass/GlassCard.tsx)) — every platform is translucent, and
 > only real blur stays gated behind `ANDROID_BLUR`, which is **off**, because M0 measured
 > `dimezisBlurView` costing frames and that has to be re-measured, not assumed. Recorded as
-> [A18](DESIGN-SYSTEM.md). Modals over a scrim (`GlassSheet`, `Celebration`) deliberately keep
-> the opaque composite — there is nothing behind them worth showing through.
+> A18. Modals over a scrim (`GlassSheet`, `Celebration`) deliberately keep the opaque
+> composite — there is nothing behind them worth showing through.
+>
+> > ⚠️ **This was reverted the next day — see M21 and [A24](DESIGN-SYSTEM.md).** The split above
+> > is a correct piece of reasoning that produced a worse screen: translucency *without* blur is
+> > not glass, it is a card you can read the page through. `surfaceColor()` survives; it now
+> > returns the opaque composite unless blur is genuinely rendering.
 >
 > **2. Onboarding ran twice, most reliably when the last two steps were skipped.** The dashboard
 > sends anyone with zero accounts to onboarding, guarded by `!accountsLoading`. But `isLoading`
@@ -1416,6 +1421,117 @@ money↔time connection (P§35) is what makes it a different product.
 > the haptics, and the celebration timing cannot be judged from `react-native-web`, which is
 > exactly the gap that produced item 1. The onboarding double-entry needs a real fresh sign-up
 > against the hosted project. A new build is required regardless: `expo-haptics` is native.
+
+> ### ✅ M20 — screen lock, shortcuts, and the More/Settings split, 2026-08-16
+>
+> Five more reports from the same Android install. Two are features, three are the app's own
+> information architecture disagreeing with itself.
+>
+> **1. Screen lock — PIN, with biometrics on top.** Settings had said "Security & PIN — Not yet"
+> since v0.1. Built and offered as a real question during onboarding, where the decision is
+> cheapest: the user is already thinking about their money being private and has not yet formed
+> the habit of opening the app without a gate. Every trade is recorded in
+> [A21](DESIGN-SYSTEM.md); the two worth repeating here:
+>
+> - **It is a screen lock and the copy says so.** It stops whoever picks up the unlocked phone.
+>   It does not encrypt anything — the Supabase session stays live behind the gate. A user who
+>   believes a lock does more than it does stops being careful about the things it doesn't cover,
+>   so overstating this would make them *less* safe, not more.
+> - **The 30-second grace period is what decides whether this gets used or switched off.**
+>   Locking on every background means the PIN pad appears when you tab out to your bank app to
+>   check a balance and tab straight back — which is the single most common thing a person does
+>   while using Savi.
+>
+> Pure layer split out as usual: `pin.ts` holds the length rule, the weak-PIN rejections and the
+> lockout arithmetic, with 13 tests. `store.ts` is the keychain I/O. Three new native modules —
+> `expo-local-authentication`, `expo-secure-store`, `expo-crypto`.
+>
+> **2. Budget, Goals and Tasks were two taps deep.** This is [A17](DESIGN-SYSTEM.md)'s bill
+> arriving: fixing the nav at five icon-only tabs left three of the things people actually open
+> reachable only through More. Three shortcuts now sit on the dashboard, **below** the hero —
+> D§26 puts money before everything, and navigation above Available Money would make the
+> dashboard a menu with a number on it. Three and not six: Accounts and Bills are already
+> reachable from cards on the same screen, and a row listing everything is a second nav bar.
+> ([A22](DESIGN-SYSTEM.md))
+>
+> **3. Profile had two front doors and Settings opened on the wrong one.** The More user card and
+> the Settings row both opened `/settings`, whose first section was Profile. Profile is now its
+> own screen reached from the card — where a person looks for their own name — and Settings keeps
+> what you change *about the app*. The card is also pinned above the scroll area: it is the
+> anchor on the one screen that also holds Sign out, and there is no `position: sticky` in React
+> Native, so being outside the `ScrollView` is the mechanism. ([A23](DESIGN-SYSTEM.md))
+>
+> **4. The sparkline showed a direction and never named the spending.** A caption now sits in the
+> chart's bottom-left gutter — "₱420 spent today · ₱2,150 this week" — overlaid rather than
+> stacked, so the card gains a fact without gaining a row and Available Money keeps being the
+> only thing with size on it.
+>
+> Two decisions have tests behind them, and both are re-statements of invariants this codebase
+> has already been burned by. **Transfers are excluded structurally**, by `type`, not by a name
+> filter — moving ₱5,000 to savings is not ₱5,000 spent. **Refunds are not netted off**, matching
+> M13: a ₱1,500 purchase refunded in full still reads as ₱1,500 spent, because netting would make
+> the dashboard disagree with the transaction list the user can scroll. The week starts **Monday**
+> and is a calendar week, not a rolling 7 days — on a Tuesday, a 7-day window quietly includes
+> last Wednesday and reports a number that reconciles against nothing. 14 tests.
+>
+> Zero spend prints nothing at all. D§63's financial calm: the dashboard does not announce
+> "₱0.00 spent this week" to someone who hasn't spent anything.
+>
+> **5. Developer surfaces hidden.** The kitchen sink and glass spike are behind `__DEV__` rather
+> than deleted — M1 made the kitchen sink permanent and the spike is M0's evidence. Both stay
+> reachable by URL; they just no longer sit in a shipping user's navigation offering "M0 blur +
+> shadow feasibility harness".
+>
+> **Found while building, not reported:** the onboarding progress dots counted four steps on web,
+> where the PIN step cannot happen and is skipped — a progress bar that never fills. The step
+> list is now derived from whether the platform has a keychain.
+>
+> **Verified:** typecheck, 420 JS tests (27 new), `deno check`, and a full **production** web
+> export — which is what actually proved the new routes and the three native modules resolve,
+> after two Metro dev servers on one tree exhausted file handles.
+>
+> **Not device-verified, and the lock is almost entirely a device question.** Biometrics, the
+> keychain, the 30-second grace across a real backgrounding, and the lockout timer have no web
+> equivalent — `isLockSupported()` returns false there and the whole feature is switched off by
+> design. A new build is required: three native modules were added.
+
+> ### ✅ M21 — two reversals, 2026-08-17
+>
+> Both are things that were right in the abstract and wrong on a phone. Recorded together as
+> [A24](DESIGN-SYSTEM.md), and A18 is struck.
+>
+> **1. Glass is opaque again unless blur is actually running.** M19 split "can this platform
+> blur?" from "can this platform be transparent?" and gave Android the translucent value with no
+> blur behind it. The argument holds and the screen got worse: what you get is a card you can
+> read the page *through* — orbs, the row above, the text of the card underneath, all sharp and
+> fully legible straight through the surface. Blur is not decoration layered onto transparency,
+> it is the half that turns *see-through* into *frosted*; without it transparency is noise.
+>
+> `surfaceColor()` stays as the one answer to "what colour is a glass surface", but returns the
+> opaque composite unless blur is genuinely rendering. This is A4 restored, and A4's original
+> phrasing was right: the solid composite is *the baseline, not a degraded state*.
+>
+> **2. No drop shadow on the bottom nav or the desktop sidebar.** `shadow.md` read as a dark
+> smear under a floating slab rather than as lift. Android's `elevation` is the worse half —
+> untinted, drawn natively, so it cannot be softened to match the tinted `boxShadow` other
+> platforms get. Both surfaces already separate with a 1px border and their own colour, and each
+> is the only floating element at its position, so a shadow had nothing to disambiguate them
+> from. **Cards keep theirs**: a card sits *among* other cards, which is what a shadow is for.
+>
+> **Third thing, which falls out of the first:** A18 stepped the *unblurred* nav up from `subtle`
+> to `elevated`, because a translucent bar over scrolling content let a list scroll visibly
+> through the tab icons. The revert deletes the problem — an unblurred nav is opaque now — so the
+> step went with it. Left in, it would only have rendered the bar a shade lighter than the level
+> it is specified at.
+>
+> The lesson is the one already at the top of the verification section, and it now has its
+> cleanest example: A18 passed typecheck, 420 tests and a full web pass, and was visibly wrong
+> within seconds of being on a device. Neither of these was findable anywhere but a phone.
+>
+> **Verified:** typecheck, 420 tests, lint clean on `components/glass` apart from GlassSheet's
+> pre-existing `useRef(new Animated.Value())` warnings. **Not device-verified** — which is the
+> whole point of the entry above it, so treat both changes as proposals until a build confirms
+> them.
 
 ---
 

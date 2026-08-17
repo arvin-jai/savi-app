@@ -12,10 +12,9 @@ app that doesn't know your bills are due Friday.
 
 ## Before you start
 
-**The whole application is uncommitted.** `git log` is one commit ("Initial commit");
-`git status` shows ~66 files. That diff *is* Savi — every migration, both Edge Functions, 385
-tests, M0 through M18. Nothing is branched or pushed, so any destructive git operation loses
-all of it and there is no way back. Commit before making changes.
+**Commit before making changes.** The app is committed now (M0–M18 landed in `5fe75a2`), but
+everything since is working-tree only and there is still no remote — nothing is pushed, so a
+destructive git operation loses whatever is uncommitted with no way back.
 
 **Nothing runs without `.env`.** Copy `.env.example` and fill in the two values that
 `npx supabase start` prints. `src/lib/supabase.ts` throws at import if they are missing, so the
@@ -32,7 +31,7 @@ APK — the service-role key and the model key must never appear there.
 | --- | --- |
 | `HAND-OFF.md` | **Start here.** Current state, invariants, gotchas |
 | `BUILD-PLAN.md` | Scope + product spec (`P§n`), and a per-milestone record of what broke |
-| `DESIGN-SYSTEM.md` | How it looks and behaves (`D§n`), plus amendments A1–A17 |
+| `DESIGN-SYSTEM.md` | How it looks and behaves (`D§n`), plus amendments A1–A24 |
 | `DESIGN-REVIEW.md` | *Why* the design changed (R1–R13) — read before "fixing" something odd |
 | `AI-BOUNDARY.md` | What the model may see and do. Authoritative over everything else on that |
 | `PIPELINE.md` | How to run, test and verify |
@@ -74,7 +73,7 @@ answers "where did it go" with a waterfall.
 npm run verify                                 # typecheck + tests — the quick gate
 npm run typecheck                              # tsc --noEmit
 npx deno check supabase/functions/*/index.ts   # the 2 files tsc cannot see (Deno globals)
-npm test                                        # jest, 393 tests
+npm test                                        # jest, 420 tests
 npx jest src/features/bills                     # one directory
 npx jest -t "clamps the 31st"                   # one test by name
 npm run db:test:all                             # all 8 SQL suites (~121 checks), needs Supabase up
@@ -102,8 +101,13 @@ testable without a device or a database:
 
 ```
 schedule.ts · timeline.ts · rules.ts · waterfall.ts · goals.ts · shifts.ts · week.ts
+spend.ts · security/pin.ts
         ↑ pure, unit-tested          api.ts ↑ I/O only          screens ↑ compose
 ```
+
+`security/` is the clearest case: `pin.ts` holds the length rule, the weak-PIN rejections and
+the lockout arithmetic with no keychain in sight; `store.ts` is the keychain. The security
+*decisions* run on CI and only the plumbing needs a phone.
 
 If a rule can only be tested by rendering a screen, it is in the wrong file. Two files were
 moved for exactly this during development (`lib/crashReport.ts`, `calendar/week.ts`) — the

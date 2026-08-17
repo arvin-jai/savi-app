@@ -39,9 +39,13 @@
 > | A15 | **Undefined states specified** — focus, layering, toast, easing, offline, overflow | §44 | [Review gaps](DESIGN-REVIEW.md#specification-gaps) |
 > | A16 | Colourblindness check run: **no nine-colour palette can pass**; the dot is never load-bearing | §7 | [BUILD-PLAN risk 12](BUILD-PLAN.md#part-7--risk-register) |
 > | A17 | **Bottom nav is icon-only** — a deliberate §44 deviation, with the mitigations that replace the label | §27, §44 | Hero Focus design handoff |
-> | A18 | **Android is translucent, just not blurred** — A6's gate narrowed to blur alone | §8, §9, §53 | Device report, v0.7.1 |
+> | ~~A18~~ | ~~Android is translucent, just not blurred~~ — **REVERTED**, see A24 | §8, §9, §53 | Device report, v0.7.1 |
 > | A19 | **Celebration surface** added alongside the toast, with a scarcity rule | §64, §59 | Device report, v0.7.1 |
 > | A20 | **Password fields carry a reveal toggle** by default | §36 | Device report, v0.7.1 |
+> | A21 | **Screen lock** — PIN + biometrics, offered in onboarding; what it is and is not | §67 | Device report, v0.7.2 |
+> | A22 | **Home carries three shortcuts**, below the hero — the cost of A17's icon-only nav | §25, §27 | Device report, v0.7.2 |
+> | A23 | **Profile leaves Settings** for the More user card; the card is pinned | §67 | Device report, v0.7.2 |
+> | A24 | **A18 reverted** — glass is opaque unless blur is actually running; **no shadow on nav** | §8, §9, §27, §53 | Device report, v0.7.2 |
 >
 > Every ⚠️ callout from v1.0 has been resolved. Amendments are marked inline where they apply.
 
@@ -1191,6 +1195,26 @@ bar.
 **If this is ever reverted**, the labels come back and this amendment is struck; do not keep a
 half-version where some tabs have labels and others do not.
 
+### Amendment A22 — Home carries three shortcuts, and why that is A17's bill arriving
+
+A17 fixed the nav at five icon-only tabs. That left Budget, Goals and Tasks reachable only
+through More — two taps and a list, which is where features go to be forgotten. Reported from
+use as exactly that.
+
+The dashboard now carries a row of three: **Budget · Goals · Tasks**, with an open count on
+Tasks. Three constraints hold it in place:
+
+- **Three, not six.** A shortcut row listing everything is a second navigation bar. Accounts and
+  Bills are already reachable from the cards above them on the same screen, so they are not here.
+- **Below the hero, always.** D§26 is explicit that money comes before everything else;
+  navigation above Available Money turns the dashboard into a menu with a number on it.
+- **A row of equal thirds, not a scroller.** Three items that all fit are three items you can hit
+  without looking. A horizontal scroll would hide one behind a gesture, which is the problem
+  this is solving, one level down.
+
+The badge count is repeated in the accessible label — a "3" floating near an icon is not a
+sentence a screen reader can read, and D§44 does not stop applying because the element is small.
+
 ---
 
 ## 7.4 Web Navigation (§28)
@@ -1714,40 +1738,54 @@ Also honor, on top of reduced motion:
 - `prefers-reduced-transparency` (web) → render the fallback, no blur
 - Android high-contrast → render the fallback
 
-### Amendment A18 — Android is translucent, it just isn't blurred
+### ~~Amendment A18 — Android is translucent, it just isn't blurred~~ (REVERTED — see A24)
 
-A6 made blur a progressive enhancement and A4 made the opaque `fallback` the baseline. In
-implementation those two collapsed into one flag, and the result was that **Android — the
-primary platform — shipped with no glass on it at all**: flat opaque panels on an ambient
-background nobody could see. That is not the design rendered cheaply, it is a different design,
-and it was reported from a device as "the transparency is gone".
+**Struck. Kept here because the reasoning was wrong in an instructive way and someone will
+propose it again.**
 
-The conflation is the bug. *Can this platform blur?* and *can this platform be transparent?* are
-different questions, and only the first has a cost. `backdrop-filter` has no React Native
-equivalent; alpha compositing is free everywhere.
+A18 argued that A4 and A6 had collapsed two separate questions into one flag: *can this platform
+blur?* and *can this platform be transparent?* Only the first has a cost — `backdrop-filter` has
+no React Native equivalent, while alpha compositing is free everywhere — so Android should take
+the translucent `background` value on every surface and only the blur should stay gated.
 
-So the rule splits in two:
+The argument is correct and the result was worse. See A24.
 
-| Question | Answer |
-| --- | --- |
-| **Is the surface translucent?** | Yes, on every platform. `glass[level].background` is the surface colour. |
-| **Is there real blur behind it?** | Web and iOS yes. Android only behind `ANDROID_BLUR`, which is **off** — `dimezisBlurView` costs frames and that has to be re-measured on a device before it ships. |
+### Amendment A24 — glass is opaque unless blur is running, and nav has no shadow
 
-`fallback` is unchanged and still load-bearing: it is the exact composite of `background` over
-the page, which is what makes it the contrast reference under A4. It is now the surface colour
-only where the design wants the known composite — modals over a scrim (`GlassSheet`,
-`Celebration`), where there is nothing behind worth showing through anyway.
+Two device reports, one root cause each. Both are reversals of things that looked right in the
+abstract.
 
-**One exception, and it is about content, not platform.** The bottom nav floats *over* scrolling
-content, and `subtle` is 40–45% alpha — without blur to absorb it, a list scrolls visibly through
-the tab icons and reads as broken rather than as glass. So an unblurred nav steps up to
-`elevated` (75%): still translucent, the ambient background still shows through, but what is
-behind stays a suggestion. Every other glass surface has the static page behind it, not moving
-content, and needs no such step.
+**1. Transparency without blur is not glass.** A18 made Android surfaces translucent with no
+blur behind them. On a phone that reads as a card you can see the page *through* — the ambient
+orbs, the row above, the text of the card underneath all stay sharp and fully legible straight
+through the surface. Busier and harder to read than the flat panel it replaced.
 
-One consequence worth stating: over an ambient orb the effective background is no longer exactly
-`fallback`. The orbs are 5–15% opacity so the shift is small, and the web audit gate composites
-the real background stack rather than assuming it — so this is measured, not hoped for.
+Blur is what turns *see-through* into *frosted*, and it is not decoration on top of
+transparency — it is the half that does the work. Without it, transparency is noise. So
+`fallback` is the surface colour **everywhere blur is not actually rendering**, which today
+means Android everywhere and every platform on a card that has not opted into blur.
+
+This restores A4 exactly, and A4's phrasing was right the first time: the solid composite is
+*the baseline, not a degraded state*. It has the second benefit of making the thing you see and
+the thing the contrast audit measures the same value, with no ambient orb shifting it.
+
+> A18 also stepped the *unblurred* bottom nav up from `subtle` to `elevated`, because a
+> translucent bar floating over scrolling content let a list scroll visibly through the tab
+> icons — `subtle` is only 40–45% alpha, and blur is normally what absorbs that. **That step is
+> also gone.** It solved a problem the revert deletes: an unblurred nav is opaque now, so there
+> is nothing to see through, and keeping it would only render the bar a shade lighter than the
+> level it is specified at.
+
+**2. The bottom nav and the desktop sidebar carry no drop shadow.** They had `shadow.md`, which
+on a device read as a dark smear under a floating slab rather than as lift. Android's half is
+the worse one: `elevation` is untinted and drawn natively behind the view, so it cannot be
+softened to match the tinted `boxShadow` the other platforms get — against the dark theme it
+mostly muddied the edge.
+
+Neither surface needs one. Both already separate from the page with a 1px border and their own
+surface colour, and each is the only floating element at its position, so there is nothing for a
+shadow to disambiguate it from. **Cards keep theirs** — a card sits *among* other cards, which is
+the case a shadow is actually for.
 
 ### Amendment A15 — states the spec left undefined
 
@@ -2010,6 +2048,45 @@ Initial Savi UI should contain:
 > **Amendment A13.** The five Main screens above are now the five bottom-nav tabs (§27), and
 > **Tasks lives under More** alongside Settings. v1.0 gave Tasks a screen group and a desktop
 > dashboard slot (§46) but no route from anywhere.
+
+### Amendment A23 — Profile is its own screen, and the More card is pinned
+
+§67 lists Profile as the first section of Settings, and the More screen also shows the user's own
+card. Both opened Settings, so there were two routes to one form and Settings opened on the thing
+most people never change.
+
+Profile is now **its own screen**, reached by tapping your own card — which is where a person
+looks for their own name. Settings keeps what you change *about the app*: appearance, currency,
+data, notifications, Ask Savi, security.
+
+The card is also **pinned above the scroll area** on More, not scrolled with the list. It is the
+screen's anchor — it says whose money this is, on the one screen that also holds Sign out.
+There is no `position: sticky` in React Native; being outside the `ScrollView` is what makes it
+stay.
+
+### Amendment A21 — the screen lock (PIN and biometrics)
+
+§67 listed Security and the app shipped "Security & PIN — Not yet". It is built: a 4-digit PIN in
+the platform keychain, optional biometrics on top, offered as a real question during onboarding
+with a real "Not now".
+
+**State plainly what it is, because the alternative is a user who stops being careful.** This is
+a *screen lock*. It stops whoever picks up your unlocked phone from reading your money. It does
+not encrypt anything: the data lives in Supabase behind RLS, the session stays live behind the
+gate, and a determined attacker with the device would go after the session token, not this. The
+lock screen and the Settings pane both say so in the user's words.
+
+| Decision | Why |
+| --- | --- |
+| **Exactly 4 digits** | A variable length forces a submit key onto every unlock — the pad cannot know when a 4-to-6 digit PIN is done. Fixing it lets the pad submit on the fourth tap, which is the entire ergonomic case for a PIN. |
+| **`1234` and `0000` rejected** | A 5-try lockout is only a control if the first five guesses are unlikely. Those two are close to a majority of real PINs. |
+| **5 tries, then 60s** | Time-based, not a permanent counter. The threat is a stranger with five minutes; a permanent lockout strands the legitimate user instead. |
+| **30-second grace on backgrounding** | Locking on *every* background means the pad appears when you tab out to your bank app and straight back — the most common thing a person does while using Savi. Thirty seconds covers that and still locks a phone put down on a table. |
+| **Biometrics needs a PIN under it** | A face or finger fails for reasons the user cannot fix in the moment. Without a PIN the only recovery is signing out. |
+| **Biometrics proven before recorded** | Storing the preference first and discovering at the next unlock that the sensor refuses is how convenience becomes a lockout. |
+| **Gate covers the router, is not a route** | A `/lock` route is navigable, back-navigable and deep-linkable — three ways past a lock screen. |
+| **Signing out clears the PIN** | It is the stated recovery from forgetting one. A lock outliving the account it locked is not a security property, it is a brick. |
+| **Off on web** | `expo-secure-store` has no web implementation, and a JS-side lock in a browser the user is sitting at is theatre. Reported honestly rather than half-working. |
 
 ---
 

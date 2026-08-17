@@ -27,7 +27,7 @@ import {
   Wallet,
   type LucideIcon,
 } from 'lucide-react-native';
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { BLUR_IS_CHEAP, surfaceColor } from '@/components/glass/GlassCard';
 import { Text } from '@/components/ui/Text';
@@ -67,16 +67,14 @@ export function GlassSidebar() {
         borderRadius: radius['2xl'],
         borderWidth: 1,
         borderColor: theme.glass.default.border,
-        // A18. The sidebar is desktop-only, so Android never sees it — this
-        // goes through the same helper purely so there is one answer to
-        // "what colour is a glass surface" rather than four.
+        // Through the same helper as every other glass surface, so there is one
+        // answer to "what colour is a glass surface" rather than four.
         backgroundColor: surfaceColor(theme.glass.default, BLUR_IS_CHEAP),
         overflow: 'hidden',
         padding: space[4],
         gap: space[5],
-        ...(Platform.OS === 'android'
-          ? { elevation: theme.shadow.md.elevation }
-          : { boxShadow: theme.shadow.md.boxShadow }),
+        // No drop shadow — the same call as GlassNavbar, kept identical so the
+        // two navigation surfaces do not drift apart. See the note there.
       }}
     >
       {BLUR_IS_CHEAP && (

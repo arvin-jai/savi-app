@@ -13,6 +13,7 @@
  */
 
 import { router } from 'expo-router';
+import { CheckSquare, PieChart, Target } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -29,15 +30,20 @@ import { Text } from '@/components/ui/Text';
 import { useAccounts } from '@/features/accounts/api';
 import { useBills } from '@/features/bills/api';
 import { STATUS_META } from '@/features/bills/schedule';
-import { useTodayTimeline } from '@/features/calendar/api';
+import { useTasks, useTodayTimeline } from '@/features/calendar/api';
 import { useGenerateRecurring, useInsight, useProfile } from '@/features/insights/api';
-import { useBalanceTrend, useFinancialSummary } from '@/features/transactions/api';
+import {
+  useBalanceTrend,
+  useFinancialSummary,
+  useWeekSpend,
+} from '@/features/transactions/api';
 import { QuickAdd } from '@/features/transactions/QuickAdd';
+import { spendCaption } from '@/features/transactions/spend';
 import { trendChangePercent } from '@/features/transactions/trend';
 import { dueLabel } from '@/lib/dates';
 import { formatMoney } from '@/lib/money';
 import { useTheme } from '@/theme/ThemeProvider';
-import { brand, brandRole, layout, radius, saviGlow, space, z } from '@/theme/tokens';
+import { a11y, brand, brandRole, iconSize, layout, radius, saviGlow, space, z } from '@/theme/tokens';
 import { useBreakpoint } from '@/theme/useBreakpoint';
 
 function greeting(hour = new Date().getHours()): string {
@@ -82,6 +88,78 @@ function Avatar({ name }: { name: string }) {
   );
 }
 
+/**
+ * The three shortcuts. A row of equal thirds rather than a scroller: three
+ * items that all fit are three items you can hit without looking, and a
+ * horizontal scroll would hide one of them behind a gesture.
+ */
+const SHORTCUTS = [
+  { label: 'Budget', href: '/budget', icon: PieChart },
+  { label: 'Goals', href: '/goals', icon: Target },
+  { label: 'Tasks', href: '/tasks', icon: CheckSquare },
+] as const;
+
+function ShortcutRow({ openTasks }: { openTasks: number }) {
+  const theme = useTheme();
+
+  return (
+    <View style={{ flexDirection: 'row', gap: space[3] }}>
+      {SHORTCUTS.map(({ label, href, icon: Icon }) => {
+        const badge = label === 'Tasks' && openTasks > 0 ? openTasks : null;
+
+        return (
+          <GlassCard
+            key={label}
+            variant="subtle"
+            padding="md"
+            radius="lg"
+            interactive
+            onPress={() => router.push(href)}
+            style={{ flex: 1, alignItems: 'center', gap: space[2], minHeight: a11y.minTouchTarget }}
+          >
+            <View>
+              <Icon size={iconSize.lg} color={theme.color.brand} strokeWidth={2} />
+              {badge !== null && (
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: -6,
+                    right: -10,
+                    minWidth: 18,
+                    height: 18,
+                    paddingHorizontal: 5,
+                    borderRadius: radius.full,
+                    backgroundColor: theme.semanticFill('bill'),
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Text variant="micro" weight="700" tone="onBrand">
+                    {badge > 9 ? '9+' : badge}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {/* D§44: the count is also in the accessible label, because a badge
+                is a visual affordance and "3" floating near an icon is not a
+                sentence a screen reader can read. */}
+            <Text
+              variant="caption"
+              weight="600"
+              accessibilityLabel={
+                badge !== null ? `${label}, ${badge} open` : label
+              }
+            >
+              {label}
+            </Text>
+          </GlassCard>
+        );
+      })}
+    </View>
+  );
+}
+
 export default function Dashboard() {
   const { data: profile } = useProfile();
   const { data: summary, isLoading: summaryLoading } = useFinancialSummary();
@@ -95,7 +173,9 @@ export default function Dashboard() {
   // Materialise any payday that has come due (idempotent, see the hook).
   useGenerateRecurring();
   const { entries: todayEntries } = useTodayTimeline();
+  const { data: tasks = [] } = useTasks();
   const { data: trend = [] } = useBalanceTrend();
+  const { data: spend } = useWeekSpend();
   const { pagePadding, useSidebar } = useBreakpoint();
   const theme = useTheme();
 
@@ -103,10 +183,14 @@ export default function Dashboard() {
   // zero or less, where a percentage is arithmetic rather than information.
   const changePercent = trendChangePercent(trend);
 
+  // Null on a quiet week — D§63's financial calm, see `spendCaption`.
+  const spentLine = spend ? spendCaption(spend, (m) => formatMoney(m)) : null;
+
   const [adding, setAdding] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   const upcomingBills = bills.filter((b) => b.status !== 'paid').slice(0, 3);
+  const openTaskCount = tasks.filter((t) => t.status !== 'done').length;
 
   /**
    * A brand-new user has nothing to dashboard. Send them through P§34's
@@ -212,6 +296,28 @@ export default function Dashboard() {
                     : `Balance over the last two weeks, ${changePercent >= 0 ? 'up' : 'down'} ${Math.abs(changePercent)} percent versus last week`
                 }
               />
+
+              {/* Sits ON the sparkline, in its bottom-left gutter, because the
+                  line is what raises "where is it going?" and the answer
+                  belongs next to the question. Overlaid rather than stacked so
+                  the card gains a fact without gaining a row — D§26 keeps
+                  Available Money the only thing with size on this card, and
+                  this stays a caption. */}
+              {spentLine && (
+                <View
+                  pointerEvents="none"
+                  style={{
+                    position: 'absolute',
+                    left: space[5],
+                    bottom: space[3],
+                    right: space[5],
+                  }}
+                >
+                  <Text variant="micro" tone="secondary" numberOfLines={1}>
+                    {spentLine}
+                  </Text>
+                </View>
+              )}
             </View>
           </GlassCard>
 
@@ -226,6 +332,19 @@ export default function Dashboard() {
               />
             </GlassCard>
           )}
+
+          {/* ── Shortcuts ─────────────────────────────────────────────
+              Budget, Goals and Tasks are three of the five things people
+              actually open, and A17's icon-only nav has no room for them —
+              they lived two taps deep behind More, which is where features go
+              to be forgotten. Three, not six: a shortcut row that lists
+              everything is a second navigation bar, and Accounts and Bills are
+              both already reachable from the cards above.
+
+              Deliberately below the hero. D§26 is explicit that the money
+              comes first; navigation above Available Money would make the
+              dashboard a menu with a number on it. */}
+          <ShortcutRow openTasks={openTaskCount} />
 
           {/* ── Level 2 — Upcoming obligations ────────────────────────── */}
           {upcomingBills.length > 0 && (

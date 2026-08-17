@@ -12,6 +12,12 @@ import { todayISO } from '@/lib/dates';
 import { qk } from '@/lib/queryClient';
 import { requireUserId, supabase } from '@/lib/supabase';
 
+import {
+  startOfWeek,
+  summariseSpend,
+  type SpendRow,
+  type SpendSummary,
+} from './spend';
 import { buildBalanceTrend, type TrendPoint } from './trend';
 
 export type TransactionWithCategory = Transaction & {
@@ -224,6 +230,38 @@ export function useBalanceTrend(days = 14) {
         [...netByDate.entries()].map(([date, netMinor]) => ({ date, netMinor })),
         days
       );
+    },
+  });
+}
+
+/**
+ * Spending so far today and this calendar week, for the dashboard caption.
+ *
+ * Fetches from the week start rather than a fixed number of days, so the window
+ * matches `summariseSpend`'s definition of "this week" exactly — a 7-day fetch
+ * feeding a Monday-based sum would silently drop rows on a Sunday. The
+ * arithmetic lives in `spend.ts`; this only goes and gets the rows.
+ */
+export function useWeekSpend() {
+  const today = todayISO();
+  const weekStart = startOfWeek(today);
+
+  return useQuery({
+    queryKey: ['spend', 'week', weekStart, today],
+    queryFn: async (): Promise<SpendSummary> => {
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('transaction_date, amount_minor, direction, type')
+        .eq('direction', 'out')
+        // Transfers are excluded again in `summariseSpend`. Belt and braces on
+        // purpose: this one saves the bytes, that one is the invariant, and the
+        // invariant is the half with a test behind it.
+        .neq('type', 'transfer')
+        .gte('transaction_date', weekStart)
+        .lte('transaction_date', today);
+
+      if (error) throw error;
+      return summariseSpend((data ?? []) as SpendRow[], today);
     },
   });
 }

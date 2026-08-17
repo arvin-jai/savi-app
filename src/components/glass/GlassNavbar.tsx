@@ -54,18 +54,17 @@ export function GlassNavbar({ tabs, state, navigation }: TabBarProps & { tabs: N
   const blurred = BLUR_IS_CHEAP || (Platform.OS === 'android' && ANDROID_BLUR);
 
   /**
-   * The nav is the one surface where translucency without blur is not simply
-   * free. It floats *over* scrolling content, and `subtle` is 40–45% alpha —
-   * enough for a list to scroll visibly through the icons, which reads as
-   * broken rather than as glass. Blur is what normally absorbs that.
+   * `subtle` either way (A24).
    *
-   * So without blur the nav steps up to `elevated` (75%): still translucent,
-   * the ambient background and the page still show through, but the content
-   * behind stays a suggestion instead of competing with the tab icons. Every
-   * other glass surface has the page behind it, not moving content, and needs
-   * no such step.
+   * A18 briefly stepped the *unblurred* nav up to `elevated` (75%), because a
+   * translucent-but-unblurred bar floating over scrolling content let a list
+   * scroll visibly through the tab icons — `subtle` is only 40–45% alpha and
+   * blur is normally what absorbs that. A24 reverted the translucency itself,
+   * so an unblurred nav is now opaque and there is nothing to see through.
+   * The step-up solved a problem that no longer exists, and keeping it would
+   * only make the bar a shade lighter than the level it is specified at.
    */
-  const level = blurred ? theme.glass.subtle : theme.glass.elevated;
+  const level = theme.glass.subtle;
 
   return (
     <View
@@ -82,9 +81,19 @@ export function GlassNavbar({ tabs, state, navigation }: TabBarProps & { tabs: N
         backgroundColor: surfaceColor(level, blurred),
         overflow: 'hidden',
         flexDirection: 'row',
-        ...(Platform.OS === 'android'
-          ? { elevation: theme.shadow.md.elevation }
-          : { boxShadow: theme.shadow.md.boxShadow }),
+        /**
+         * **No drop shadow.** The bar carried `shadow.md` — `elevation` on
+         * Android, `boxShadow` elsewhere — and on a device it read as a dark
+         * smear under a floating slab rather than as lift. Android's
+         * `elevation` is the worse half: it is untinted and drawn natively, so
+         * it cannot be softened to match the tinted shadow the other platforms
+         * get, and against the dark theme it mostly just muddied the edge.
+         *
+         * The bar does not need one. It already separates from the page with a
+         * 1px border and its own surface colour, and it is the only floating
+         * element at its position — there is nothing for a shadow to
+         * disambiguate it from.
+         */
       }}
     >
       {blurred && (

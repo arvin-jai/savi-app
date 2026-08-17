@@ -11,6 +11,8 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AuthGate } from '@/features/auth/AuthGate';
 import { AuthProvider } from '@/features/auth/AuthProvider';
+import { LockGate } from '@/features/security/LockGate';
+import { LockProvider } from '@/features/security/LockProvider';
 import { queryClient } from '@/lib/queryClient';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 
@@ -24,7 +26,11 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
             <AuthProvider>
-              <ThemedRoot />
+              {/* Inside AuthProvider: signing out clears the PIN, and the gate
+                  offers signing out as the only way past a forgotten one. */}
+              <LockProvider>
+                <ThemedRoot />
+              </LockProvider>
             </AuthProvider>
           </ThemeProvider>
         </QueryClientProvider>
@@ -59,14 +65,19 @@ function ThemedRoot() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.color.background }}>
       <StatusBar style={theme.isDark ? 'light' : 'dark'} />
-      <AuthGate>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: theme.color.background },
-          }}
-        />
-      </AuthGate>
+      {/* LockGate covers the router rather than being a route in it — a
+          `/lock` screen would be navigable, back-navigable and deep-linkable,
+          which is three ways past a lock screen. */}
+      <LockGate>
+        <AuthGate>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: theme.color.background },
+            }}
+          />
+        </AuthGate>
+      </LockGate>
     </View>
   );
 }

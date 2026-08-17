@@ -16,7 +16,7 @@ import { computeInsight, isInsightHref, type CategorySpend, type Insight } from 
 
 export function useProfile() {
   return useQuery({
-    queryKey: ['profile'],
+    queryKey: qk.profile,
     queryFn: async (): Promise<Profile | null> => {
       const userId = await currentUserId();
       if (!userId) return null;

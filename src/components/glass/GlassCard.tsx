@@ -52,8 +52,6 @@ export const BLUR_IS_CHEAP = Platform.OS === 'web' || Platform.OS === 'ios';
  * frames — flipping this to `true` is a one-line experiment, but it is one that
  * has to be re-measured on a device before it ships, not assumed.
  *
- * Note this is a *separate* question from whether Android draws glass at all.
- * See `surfaceColor` — Android has translucency either way.
  */
 export const ANDROID_BLUR = false;
 
@@ -61,31 +59,29 @@ export const ANDROID_BLUR = false;
  * The background colour for a glass level, given whether real blur is running
  * behind it.
  *
- * **A4 revisited (A18).** A4 made the opaque `fallback` the surface anywhere
- * blur was unavailable, which on Android meant *every* surface. That was one
- * conflation too many: "can this platform blur?" and "can this platform be
- * transparent?" are different questions, and only the first one has a cost.
- * `backdrop-filter` is what Android lacks; alpha compositing it does for free.
+ * **Opaque unless blur is actually rendering. This is A4, and A18 tried the
+ * other thing and was reverted.**
  *
- * The symptom was that Android shipped with no glass at all — flat opaque
- * panels on an ambient background nobody could see, which is not the design in
- * a cheaper form, it is a different design. So Android now takes the translucent
- * value like everyone else, and only the blur stays gated.
+ * A18's reasoning was that "can this platform blur?" and "can this platform be
+ * transparent?" are separate questions, so Android should take the translucent
+ * value even with no blur behind it. That is true in the abstract and wrong on
+ * a phone: translucency without blur is not glass, it is a card you can read
+ * the page through. Everything behind it — the ambient orbs, the row above,
+ * the text of the card underneath — stays sharp and legible straight through
+ * the surface, and the result is busier and harder to read than the flat panel
+ * it replaced. Blur is what turns "see-through" into "frosted", and without it
+ * transparency is just noise.
  *
- * The `fallback` values are unchanged and still load-bearing: they are the exact
- * composite of `background` over the page, which makes them the contrast
- * reference for text on glass (`theme.glassFallback`). The web audit gate
- * composites the real stack anyway, so it measures this rather than assuming it.
+ * So `fallback` is the surface everywhere blur is not running. It is the exact
+ * composite of `background` over the page, which is also what makes it the
+ * contrast reference for text on glass (`theme.glassFallback`) — one value that
+ * is both what you see and what the audit measures.
  */
 export function surfaceColor(
   level: { background: string; fallback: string },
   blurred: boolean
 ): string {
-  if (blurred) return level.background;
-  // Android: no blur, but the ambient orbs and the content behind still show
-  // through, which is the part the user actually reads as "glass".
-  if (Platform.OS === 'android') return level.background;
-  return level.fallback;
+  return blurred ? level.background : level.fallback;
 }
 
 export type GlassCardProps = {
@@ -148,8 +144,8 @@ export function GlassCard({
     overflow: 'hidden',
   };
 
-  // A18: translucent wherever the platform can composite alpha (everywhere),
-  // opaque only where the design needs the known composite. See surfaceColor.
+  // A4: the solid composite. Not a degraded state — the baseline. See
+  // `surfaceColor` for why translucency without blur was tried and reverted.
   const surface: ViewStyle = { backgroundColor: surfaceColor(level, useRealBlur) };
 
   // A7: `elevation` is the untinted Android fallback, so a tinted glow has to

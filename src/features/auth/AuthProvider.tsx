@@ -11,6 +11,7 @@
 import type { Session, User } from '@supabase/supabase-js';
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
+import { clearPin } from '@/features/security/store';
 import { supabase } from '@/lib/supabase';
 
 type AuthContextValue = {
@@ -99,6 +100,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user: session?.user ?? null,
       initialising,
       signOut: async () => {
+        /**
+         * The PIN goes with the session, and this is the *only* recovery from a
+         * forgotten one — the lock screen says so. It clears first: signing out
+         * and then failing to clear would leave the next user of this phone
+         * facing a PIN nobody knows, guarding an app with no session in it.
+         *
+         * A screen lock outliving the account it was locking is not a security
+         * property, it is a brick.
+         */
+        await clearPin();
         await supabase.auth.signOut();
       },
     }),

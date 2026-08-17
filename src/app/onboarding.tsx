@@ -2,9 +2,9 @@
  * Onboarding (P§34) — what makes the app useful in the first five minutes
  * instead of presenting an empty dashboard.
  *
- *   welcome → account → monthly income → recurring bills → ready
+ *   welcome → account → monthly income → recurring bills → PIN → ready
  *
- * **The two bookend steps are the point, not decoration.** The middle three
+ * **The two bookend steps are the point, not decoration.** The middle four
  * collect data, and a screen that only collects data reads as a form — which is
  * exactly what a money app has to avoid, because the user arrived apprehensive
  * about their money, not eager to do data entry. So:
@@ -13,20 +13,26 @@
  *     only screen with no input on it, and that is deliberate: the first thing
  *     the user does here is agree to start, not type.
  *   - `ready` reads back what they told Savi and turns it into the questions it
- *     can now answer. That is what makes the three middle steps feel like they
- *     bought something. Skipping is still fine — the recap only claims what was
+ *     can now answer. That is what makes the middle steps feel like they bought
+ *     something. Skipping is still fine — the recap only claims what was
  *     actually entered.
  *
  * Every step past the account is skippable: P§9's philosophy is minimum input,
  * and someone who only creates an account still lands on a working dashboard.
  * The income and bills they DO enter are exactly what the welcome insight
  * (rules.ts) turns into the P§34 closing message.
+ *
+ * **`protect` is offered here rather than buried in Settings** because the
+ * decision is cheapest now: the user is already thinking about their money
+ * being private, and has not yet formed the habit of opening the app without a
+ * gate. It is a genuine question with a real "Not now", and it disappears
+ * entirely on web, where there is no keychain to put a PIN in.
  */
 
 import { router } from 'expo-router';
-import { CalendarClock, PiggyBank, Sparkles, Wallet } from 'lucide-react-native';
+import { CalendarClock, PiggyBank, ShieldCheck, Sparkles, Wallet } from 'lucide-react-native';
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -39,6 +45,9 @@ import { Input, MoneyInput } from '@/components/ui/Input';
 import { ACCOUNT_TYPE_LABELS, useCreateAccount } from '@/features/accounts/api';
 import { useBills, useCreateBill } from '@/features/bills/api';
 import { useCreateRecurringIncome } from '@/features/insights/api';
+import { useLock } from '@/features/security/LockProvider';
+import { SetPin } from '@/features/security/SetPin';
+import { biometricLabel, isBiometricAvailable, isLockSupported } from '@/features/security/store';
 import type { AccountType } from '@/lib/database.types';
 import { hapticCelebrate, hapticStep } from '@/lib/haptics';
 import { formatMoney, parseMoney } from '@/lib/money';
@@ -47,14 +56,22 @@ import { HOME } from '@/lib/routes';
 import { useTheme } from '@/theme/ThemeProvider';
 import { iconSize, layout, radius, space } from '@/theme/tokens';
 
-type Step = 'welcome' | 'account' | 'income' | 'bills' | 'ready';
+type Step = 'welcome' | 'account' | 'income' | 'bills' | 'protect' | 'ready';
 
 /**
  * Only the steps that ask for something are counted. `welcome` and `ready` are
  * the frame around the journey, and numbering them would make the whole thing
- * read as five forms instead of three questions.
+ * read as five forms instead of four questions.
+ *
+ * `protect` is in the list only where it can actually happen. A fourth dot on
+ * web — where there is no keychain and the step is skipped — is a progress bar
+ * that never fills, which is worse than no progress bar.
  */
-const COUNTED: Step[] = ['account', 'income', 'bills'];
+function countedSteps(lockSupported: boolean): Step[] {
+  const steps: Step[] = ['account', 'income', 'bills'];
+  if (lockSupported) steps.push('protect');
+  return steps;
+}
 
 const ACCOUNT_TYPES = Object.keys(ACCOUNT_TYPE_LABELS) as AccountType[];
 
@@ -65,9 +82,31 @@ export default function Onboarding() {
   const createBill = useCreateBill();
   const { data: bills = [] } = useBills();
 
+  const theme = useTheme();
+  const { refresh: refreshLock } = useLock();
+
   const [step, setStep] = useState<Step>('welcome');
   const [error, setError] = useState<string | null>(null);
   const [leaving, setLeaving] = useState(false);
+
+  // Step 4 — screen lock. Skipped entirely where there is no keychain (web).
+  const lockSupported = isLockSupported();
+  const [settingPin, setSettingPin] = useState(false);
+  const [biometricName, setBiometricName] = useState('biometrics');
+  const [pinSet, setPinSet] = useState(false);
+
+  useEffect(() => {
+    if (!lockSupported) return;
+    let active = true;
+    isBiometricAvailable().then(async (available) => {
+      if (!available || !active) return;
+      const label = await biometricLabel();
+      if (active) setBiometricName(label);
+    });
+    return () => {
+      active = false;
+    };
+  }, [lockSupported]);
 
   // Step 1 — account
   const [accountName, setAccountName] = useState('');
@@ -161,6 +200,19 @@ export default function Onboarding() {
   }
 
   /**
+   * The PIN exists in the keychain by the time `SetPin` calls back, but
+   * `LockProvider` read the keychain at cold start and has no reason to know
+   * it changed. Without this refresh the lock is set and simply does not
+   * engage until the next launch — set-but-inert, which is the worst state a
+   * security control can be in because the user believes it is on.
+   */
+  async function onPinSet() {
+    setPinSet(true);
+    await refreshLock();
+    reachReady();
+  }
+
+  /**
    * Wait for the accounts cache to actually hold the new account before
    * navigating.
    *
@@ -182,7 +234,8 @@ export default function Onboarding() {
     router.replace(HOME);
   }
 
-  const stepIndex = COUNTED.indexOf(step);
+  const counted = countedSteps(lockSupported);
+  const stepIndex = counted.indexOf(step);
 
   return (
     <View style={{ flex: 1 }}>
@@ -200,7 +253,7 @@ export default function Onboarding() {
           }}
           keyboardShouldPersistTaps="handled"
         >
-          {stepIndex >= 0 && <StepProgress index={stepIndex} total={COUNTED.length} />}
+          {stepIndex >= 0 && <StepProgress index={stepIndex} total={counted.length} />}
 
           {step === 'welcome' && (
             <>
@@ -381,8 +434,57 @@ export default function Onboarding() {
               <Button
                 label={bills.length > 0 ? "That's all of them" : 'Skip for now'}
                 block
-                onPress={reachReady}
+                onPress={() => go(lockSupported ? 'protect' : 'ready')}
               />
+            </>
+          )}
+
+          {step === 'protect' && (
+            <>
+              {settingPin ? (
+                <SetPin onDone={onPinSet} onCancel={() => setSettingPin(false)} />
+              ) : (
+                <>
+                  <View style={{ alignItems: 'center', gap: space[4] }}>
+                    <View
+                      style={{
+                        width: 72,
+                        height: 72,
+                        borderRadius: radius.full,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: `${theme.color.brand}26`,
+                      }}
+                    >
+                      <ShieldCheck size={iconSize.hero} color={theme.color.brand} />
+                    </View>
+
+                    <View style={{ gap: space[2] }}>
+                      <Text variant="h1" style={{ textAlign: 'center' }}>
+                        Lock Savi with a PIN?
+                      </Text>
+                      <Text variant="body" tone="secondary" style={{ textAlign: 'center' }}>
+                        Anyone who picks up your unlocked phone can otherwise see every peso
+                        you have. Four digits, and {biometricName} if your phone offers it.
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Said here rather than discovered later. A lock that turns
+                      out to do less than the user assumed is worse than no
+                      lock, because they stopped being careful. */}
+                  <GlassCard variant="subtle" padding="lg" style={{ gap: space[2] }}>
+                    <Text variant="caption" tone="secondary">
+                      This locks the app on this phone. Your data lives in your account, not
+                      here — so if you forget the PIN, signing out clears it and nothing is
+                      lost.
+                    </Text>
+                  </GlassCard>
+
+                  <Button label="Set up a PIN" block onPress={() => setSettingPin(true)} />
+                  <Button label="Not now" variant="ghost" block onPress={reachReady} />
+                </>
+              )}
             </>
           )}
 
@@ -393,6 +495,7 @@ export default function Onboarding() {
               incomeMinor={savedIncomeMinor}
               billCount={bills.length}
               billsTotalMinor={bills.reduce((sum, b) => sum + b.amount_minor, 0)}
+              pinSet={pinSet}
               leaving={leaving}
               onFinish={finish}
             />
@@ -471,6 +574,7 @@ function Ready({
   incomeMinor,
   billCount,
   billsTotalMinor,
+  pinSet,
   leaving,
   onFinish,
 }: {
@@ -479,6 +583,7 @@ function Ready({
   incomeMinor: number | null;
   billCount: number;
   billsTotalMinor: number;
+  pinSet: boolean;
   leaving: boolean;
   onFinish: () => void;
 }) {
@@ -495,6 +600,7 @@ function Ready({
       `${billCount} ${billCount === 1 ? 'bill' : 'bills'} worth ${formatMoney(billsTotalMinor)}`
     );
   }
+  if (pinSet) facts.push('A PIN, so only you can open it');
 
   return (
     <>

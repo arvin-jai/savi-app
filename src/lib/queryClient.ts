@@ -36,6 +36,7 @@ export const queryClient = new QueryClient({
 /** Query keys in one place so invalidation can't drift from fetching. */
 export const qk = {
   accounts: ['accounts'] as const,
+  profile: ['profile'] as const,
   account: (id: string) => ['accounts', id] as const,
   transactions: (filters?: Record<string, unknown>) =>
     filters ? (['transactions', filters] as const) : (['transactions'] as const),
