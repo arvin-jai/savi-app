@@ -21,12 +21,18 @@ import { HOME } from '@/lib/routes';
 import { useTheme } from '@/theme/ThemeProvider';
 
 import { useAuth } from './AuthProvider';
+import { landingRoute } from './landing';
+import { useHasLaunchedBefore } from './launchStore';
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const { session, initialising } = useAuth();
   const segments = useSegments();
   const navigationState = useRootNavigationState();
   const theme = useTheme();
+
+  // Welcome on a fresh install, Login afterwards. Null while the flag is being
+  // read — see landing.ts.
+  const landing = landingRoute(useHasLaunchedBefore());
 
   useEffect(() => {
     // Navigating before the router has mounted throws.
@@ -49,11 +55,14 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     const inPasswordReset = inAuthGroup && segments[1] === 'reset-password';
 
     if (!session && !inAuthGroup && !inDevGroup) {
-      router.replace('/(auth)/welcome');
+      // Nothing to do until the first-launch flag lands; this effect re-runs
+      // when it does. Defaulting to Welcome here would show it for a frame to
+      // every returning user, which is the whole thing we are removing.
+      if (landing) router.replace(landing);
     } else if (session && inAuthGroup && !inPasswordReset) {
       router.replace(HOME);
     }
-  }, [session, initialising, segments, navigationState?.key]);
+  }, [session, initialising, segments, navigationState?.key, landing]);
 
   if (initialising) {
     return (

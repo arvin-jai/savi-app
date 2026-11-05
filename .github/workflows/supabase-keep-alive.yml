@@ -1,0 +1,43 @@
+name: Keep Supabase active
+
+on:
+  schedule:
+    # Three requests per day, away from the top of the hour when scheduled
+    # GitHub Actions runs are more likely to be delayed.
+    - cron: "17 */8 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    name: Call read-only keep-alive RPC
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Request Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${SUPABASE_URL}" || -z "${SUPABASE_ANON_KEY}" ]]; then
+            echo "Missing SUPABASE_URL or SUPABASE_ANON_KEY repository secret."
+            exit 1
+          fi
+
+          curl \
+            --fail-with-body \
+            --silent \
+            --show-error \
+            --request POST \
+            --header "apikey: ${SUPABASE_ANON_KEY}" \
+            --header "Content-Type: application/json" \
+            --data '{}' \
+            "${SUPABASE_URL%/}/rest/v1/rpc/keep_alive"
+
+          echo
+          echo "Supabase keep-alive request succeeded."

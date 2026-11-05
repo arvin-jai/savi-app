@@ -28,10 +28,12 @@ import { Skeleton, Toast } from '@/components/ui/feedback';
 import { Sparkline } from '@/components/ui/Sparkline';
 import { Text } from '@/components/ui/Text';
 import { useAccounts } from '@/features/accounts/api';
+import { accountLabel } from '@/features/accounts/label';
 import { useBills } from '@/features/bills/api';
 import { STATUS_META } from '@/features/bills/schedule';
 import { useTasks, useTodayTimeline } from '@/features/calendar/api';
 import { useGenerateRecurring, useInsight, useProfile } from '@/features/insights/api';
+import { isSettled, onboardingDecision } from '@/features/onboarding/status';
 import {
   useBalanceTrend,
   useFinancialSummary,
@@ -42,6 +44,7 @@ import { spendCaption } from '@/features/transactions/spend';
 import { trendChangePercent } from '@/features/transactions/trend';
 import { dueLabel } from '@/lib/dates';
 import { formatMoney } from '@/lib/money';
+import { accountRoute } from '@/lib/routes';
 import { useTheme } from '@/theme/ThemeProvider';
 import { a11y, brand, brandRole, iconSize, layout, radius, saviGlow, space, z } from '@/theme/tokens';
 import { useBreakpoint } from '@/theme/useBreakpoint';
@@ -161,7 +164,11 @@ function ShortcutRow({ openTasks }: { openTasks: number }) {
 }
 
 export default function Dashboard() {
-  const { data: profile } = useProfile();
+  const {
+    data: profile,
+    isLoading: profileLoading,
+    isFetching: profileFetching,
+  } = useProfile();
   const { data: summary, isLoading: summaryLoading } = useFinancialSummary();
   const {
     data: accounts,
@@ -194,25 +201,24 @@ export default function Dashboard() {
 
   /**
    * A brand-new user has nothing to dashboard. Send them through P§34's
-   * onboarding instead of showing a page of zeros — but only once accounts
-   * have actually LOADED as empty, never while they're still in flight.
+   * onboarding instead of showing a page of zeros.
    *
-   * `isLoading` alone is not "in flight". It is false whenever the cache holds
-   * *any* data, including the stale `[]` from before onboarding created an
-   * account. So finishing onboarding used to land on the dashboard, read that
-   * stale empty array while the invalidated refetch was still running, and
-   * bounce the user straight back into onboarding a second time — which is
-   * exactly what skipping the income and bills steps made easy to hit, because
-   * skipping gets you back here faster than the refetch resolves.
-   *
-   * `isFetching` covers the refetch case that `isLoading` does not.
+   * The rule itself lives in `onboardingDecision` — pure and unit-tested,
+   * because both ways of getting it wrong are bad and neither is reachable from
+   * a test while it sits in this effect. Read that file before changing this;
+   * the short version is that "no accounts" was never the same question as
+   * "never onboarded", and `profiles.onboarded_at` is now the primary signal.
    */
+  const decision = onboardingDecision({
+    profile,
+    profileSettled: isSettled({ isLoading: profileLoading, isFetching: profileFetching }),
+    accounts,
+    accountsSettled: isSettled({ isLoading: accountsLoading, isFetching: accountsFetching }),
+  });
+
   useEffect(() => {
-    if (accountsLoading || accountsFetching) return;
-    if (accounts && accounts.length === 0) {
-      router.replace('/onboarding');
-    }
-  }, [accountsLoading, accountsFetching, accounts]);
+    if (decision === 'onboard') router.replace('/onboarding');
+  }, [decision]);
 
   const name = profile?.display_name?.trim();
 
@@ -345,6 +351,65 @@ export default function Dashboard() {
               comes first; navigation above Available Money would make the
               dashboard a menu with a number on it. */}
           <ShortcutRow openTasks={openTaskCount} />
+
+          {/**
+           * Accounts — "where is my money", answered before the obligations.
+           *
+           * The hero says how much is spendable; this says where it actually
+           * sits, which is the next question and previously had no answer on
+           * this screen at all. Kept to a horizontal strip of small cards so it
+           * cannot compete with Available Money for weight (D§26) — it is a
+           * breakdown of the number above, not a rival to it.
+           *
+           * Tapping one opens that account's own ledger rather than the
+           * management screen: from the dashboard the question is "what
+           * happened in here", not "let me rename this".
+           */}
+          {accounts && accounts.length > 0 && (
+            <View style={{ gap: space[2] }}>
+              <Text variant="label" tone="secondary">
+                Accounts
+              </Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                // The cards carry a glass edge and shadow; let the bleed render
+                // rather than being clipped at the scroller's bounds, which
+                // reads as a hard cut through the card.
+                style={{ overflow: 'visible' }}
+                contentContainerStyle={{
+                  gap: space[3],
+                  paddingHorizontal: space[1],
+                  paddingVertical: space[1],
+                  paddingRight: space[5],
+                }}
+              >
+                {accounts.map((a) => (
+                  <GlassCard
+                    key={a.id}
+                    variant="subtle"
+                    padding="md"
+                    interactive
+                    onPress={() => router.push(accountRoute(a.id))}
+                    accessibilityLabel={`${a.name}, ${formatMoney(a.balance_minor)}. View transactions.`}
+                    style={{ width: 150, gap: space[1] }}
+                  >
+                    <Text variant="caption" tone="secondary" numberOfLines={1}>
+                      {accountLabel(a, accounts)}
+                    </Text>
+                    <Text variant="h4" numberOfLines={1}>
+                      {formatMoney(a.balance_minor)}
+                    </Text>
+                    {a.is_liability && (
+                      <Text variant="micro" tone="danger">
+                        Owed · not in Available
+                      </Text>
+                    )}
+                  </GlassCard>
+                ))}
+              </ScrollView>
+            </View>
+          )}
 
           {/* ── Level 2 — Upcoming obligations ────────────────────────── */}
           {upcomingBills.length > 0 && (

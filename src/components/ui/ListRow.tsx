@@ -18,7 +18,7 @@ import { View } from 'react-native';
 import { GlassCard } from '@/components/glass/GlassCard';
 import { Text } from '@/components/ui/Text';
 import { useTheme } from '@/theme/ThemeProvider';
-import { a11y, brand, iconSize, radius, space } from '@/theme/tokens';
+import { a11y, iconSize, radius, space } from '@/theme/tokens';
 
 export function ListRow({
   icon: Icon,
@@ -58,7 +58,7 @@ export function ListRow({
           borderRadius: radius.md,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: theme.isDark ? 'rgba(167,139,250,0.14)' : 'rgba(124,58,237,0.08)',
+          backgroundColor: theme.color.surfaceSecondary,
         }}
       >
         <Icon size={iconSize.sm} color={theme.color.brand} strokeWidth={2} />
@@ -86,10 +86,15 @@ export function ListRow({
             paddingVertical: 2,
             borderRadius: radius.full,
             alignItems: 'center',
-            backgroundColor: theme.isDark ? 'rgba(167,139,250,0.2)' : 'rgba(124,58,237,0.12)',
+            backgroundColor: theme.isDark ? '#FFFFFF' : '#171717',
           }}
         >
-          <Text variant="micro" weight="600" tone="brand">
+          <Text
+            variant="micro"
+            weight="600"
+            tone="brand"
+            style={{ color: theme.isDark ? '#111111' : '#FFFFFF' }}
+          >
             {count}
           </Text>
         </View>

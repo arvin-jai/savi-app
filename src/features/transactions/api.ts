@@ -25,16 +25,32 @@ export type TransactionWithCategory = Transaction & {
   account: { id: string; name: string } | null;
 };
 
-export function useTransactions(limit = 100) {
+/**
+ * The ledger, newest first.
+ *
+ * `accountId` scopes it to one account for the account detail screen. It is
+ * part of the query KEY as well as the filter — sharing a key between the full
+ * list and a filtered one would serve whichever resolved first to both, and on
+ * a money screen that means showing a user someone else's arithmetic about
+ * their own balance.
+ *
+ * The key stays under the `['transactions']` prefix, so `invalidateMoney()`
+ * still reaches every variant without having to know they exist.
+ */
+export function useTransactions(limit = 100, accountId?: string) {
   return useQuery({
-    queryKey: qk.transactions({ limit }),
+    queryKey: accountId ? qk.transactions({ limit, accountId }) : qk.transactions({ limit }),
     queryFn: async (): Promise<TransactionWithCategory[]> => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('transactions')
         .select('*, category:categories(id,name,slug), account:accounts(id,name)')
         .order('transaction_date', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(limit);
+
+      if (accountId) query = query.eq('account_id', accountId);
+
+      const { data, error } = await query;
 
       if (error) throw error;
       return (data ?? []) as unknown as TransactionWithCategory[];

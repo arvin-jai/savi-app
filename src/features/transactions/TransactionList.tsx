@@ -31,15 +31,23 @@ export function TransactionList({
   onAdd,
   header,
   bottomInset: bottomInsetOverride,
+  accountId,
+  emptyTitle,
+  emptyBody,
 }: {
   onSelect?: (txn: TransactionWithCategory) => void;
   onAdd?: () => void;
   header?: React.ReactElement;
   /** Extra clearance for a screen-level floating control, when present. */
   bottomInset?: number;
+  /** Scope the list to one account. Omit for the whole ledger. */
+  accountId?: string;
+  /** Empty-state copy, when "no transactions at all" is the wrong thing to say. */
+  emptyTitle?: string;
+  emptyBody?: string;
 }) {
   const { data, isLoading, isError, error, refetch, isRefetching, isPlaceholderData } =
-    useTransactions();
+    useTransactions(100, accountId);
   const { pagePadding } = useBreakpoint();
   const defaultBottomInset = useScrollBottomInset();
   const bottomInset = bottomInsetOverride ?? defaultBottomInset;
@@ -136,8 +144,11 @@ export function TransactionList({
       }
       ListEmptyComponent={
         <EmptyState
-          title="No transactions yet"
-          body="Add your first expense or income and Savi will start tracking what you can actually spend."
+          title={emptyTitle ?? 'No transactions yet'}
+          body={
+            emptyBody ??
+            'Add your first expense or income and Savi will start tracking what you can actually spend.'
+          }
           action={onAdd ? <Button label="Add a transaction" onPress={onAdd} /> : undefined}
         />
       }

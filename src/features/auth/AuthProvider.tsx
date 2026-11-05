@@ -9,9 +9,18 @@
  */
 
 import type { Session, User } from '@supabase/supabase-js';
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 
 import { clearPin } from '@/features/security/store';
+import { queryClient } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 
 type AuthContextValue = {
@@ -35,8 +44,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [initialising, setInitialising] = useState(true);
 
+  /**
+   * Who the cache currently belongs to. `undefined` means "nothing observed
+   * yet" and is deliberately distinct from `null` (signed out) — the first
+   * observation must not count as a change.
+   */
+  const cachedUserId = useRef<string | null | undefined>(undefined);
+
   useEffect(() => {
     let active = true;
+
+    /**
+     * Every session update goes through here, because a session change is also
+     * a cache change and the two must not drift.
+     *
+     * **The query cache is global and not keyed by user.** `qk.accounts` is
+     * literally `['accounts']`, `gcTime` is 24 hours, and nothing has ever
+     * emptied it on sign-out. Two consequences, both real:
+     *
+     *   - Sign in as a different user on the same device and, until each
+     *     refetch lands, that user is looking at the previous one's balances.
+     *     For a money app that is the worst bug in this file.
+     *   - Sign out and back in inside `staleTime` (30s) and no refetch runs at
+     *     all — the cached value is still fresh. Anything reading the cache
+     *     reads the *previous* session's answer with `isFetching` false, so the
+     *     usual `isSettled` guard cannot help: it guards a refetch in flight,
+     *     not one that never starts. When the cached value was the `[]` a
+     *     racing refetch stored during sign-out, the dashboard concluded "new
+     *     user" and ran onboarding for an account that already existed.
+     *
+     * Clearing on identity change fixes both at the source. It is deliberately
+     * on the *change*, not on every event: `onAuthStateChange` also fires for
+     * silent token refresh, and throwing away every cache each time the token
+     * rotates would refetch the whole app on a timer.
+     */
+    function applySession(next: Session | null) {
+      const nextUserId = next?.user.id ?? null;
+
+      if (cachedUserId.current !== undefined && cachedUserId.current !== nextUserId) {
+        queryClient.clear();
+      }
+      cachedUserId.current = nextUserId;
+
+      setSession(next);
+      setInitialising(false);
+    }
 
     /**
      * Never hang on the session restore.
@@ -61,8 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
      */
     const timer = setTimeout(() => {
       if (!active) return;
-      setSession(null);
-      setInitialising(false);
+      applySession(null);
     }, SESSION_RESTORE_TIMEOUT_MS);
 
     supabase.auth
@@ -70,22 +121,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then(({ data }) => {
         if (!active) return;
         clearTimeout(timer);
-        setSession(data.session);
-        setInitialising(false);
+        applySession(data.session);
       })
       .catch(() => {
         if (!active) return;
         clearTimeout(timer);
-        setSession(null);
-        setInitialising(false);
+        applySession(null);
       });
 
     // Covers sign-in, sign-out, and silent token refresh. Without this a
     // refreshed token never reaches React state and the app keeps a stale one.
     const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
       if (!active) return;
-      setSession(next);
-      setInitialising(false);
+      applySession(next);
     });
 
     return () => {

@@ -8,7 +8,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
 
 import {
@@ -64,9 +64,16 @@ function isPreference(v: unknown): v is ThemePreference {
 export function ThemeProvider({
   children,
   initialPreference = 'system',
+  forcedTheme,
 }: {
   children: ReactNode;
   initialPreference?: ThemePreference;
+  /**
+   * A deliberately inverted product surface, such as the Money workspace or
+   * the ledger entry sheet. Nested providers use this without changing the
+   * user's saved app-wide appearance preference.
+   */
+  forcedTheme?: ThemeName;
 }) {
   const systemScheme = useColorScheme();
   const [preference, setPreferenceState] = useState<ThemePreference>(initialPreference);
@@ -77,6 +84,8 @@ export function ThemeProvider({
   // disk read. A splash-gated variant would be the fix if it ever shows.
   useEffect(() => {
     let active = true;
+    if (forcedTheme) return;
+
     AsyncStorage.getItem(STORAGE_KEY)
       .then((saved) => {
         if (active && isPreference(saved)) setPreferenceState(saved);
@@ -88,15 +97,16 @@ export function ThemeProvider({
     return () => {
       active = false;
     };
-  }, []);
+  }, [forcedTheme]);
 
-  const setPreference = (next: ThemePreference) => {
+  const setPreference = useCallback((next: ThemePreference) => {
+    if (forcedTheme) return;
     setPreferenceState(next);
     void AsyncStorage.setItem(STORAGE_KEY, next).catch(() => {});
-  };
+  }, [forcedTheme]);
 
-  const name: ThemeName =
-    preference === 'system' ? (systemScheme === 'dark' ? 'dark' : 'light') : preference;
+  const name: ThemeName = forcedTheme ??
+    (preference === 'system' ? (systemScheme === 'dark' ? 'dark' : 'light') : preference);
 
   const value = useMemo<ThemeContextValue>(() => {
     const isDark = name === 'dark';
@@ -114,7 +124,7 @@ export function ThemeProvider({
       categoryColor: (c) => (isDark ? category[c].dark : category[c].light),
       glassFallback: (level) => glass[name][level].fallback,
     };
-  }, [name, preference]);
+  }, [name, preference, setPreference]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

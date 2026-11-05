@@ -13,19 +13,19 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const brand = {
-  50: '#F5F3FF',
-  100: '#EDE9FE',
-  200: '#DDD6FE',
-  300: '#C4B5FD',
-  400: '#A78BFA',
+  50: '#F7F7F7',
+  100: '#EEEEEE',
+  200: '#D8D8D8',
+  300: '#AFAFAF',
+  400: '#777777',
   /** Surfaces, accents, charts. NEVER a background for body-size white text (4.22:1). */
-  500: '#8B5CF6',
+  500: '#2A2A2A',
   /** Primary buttons, FAB, links, focus ring. 5.70:1 on white. */
-  600: '#7C3AED',
+  600: '#171717',
   /** Pressed state. */
-  700: '#6D28D9',
-  800: '#5B21B6',
-  900: '#4C1D95',
+  700: '#0D0D0D',
+  800: '#050505',
+  900: '#000000',
 } as const;
 
 /** Semantic aliases — A8. Use these, not the numeric steps. */
@@ -137,23 +137,23 @@ export type CategoryName = keyof typeof category;
 
 export const color = {
   light: {
-    background: '#F6F7FB',
+    background: '#F3F3F3',
     surface: '#FFFFFF',
-    surfaceSecondary: '#F1F2F7',
-    textPrimary: '#18181B',
+    surfaceSecondary: '#F6F6F6',
+    textPrimary: '#151515',
     /** A5: was #71717A (4.51:1 — passed by 0.01, failed over glass). Now ~7.2:1. */
-    textSecondary: '#52525B',
+    textSecondary: '#676767',
     brand: brandRole.action,
-    border: 'rgba(0,0,0,0.06)',
+    border: 'rgba(0,0,0,0.09)',
   },
   dark: {
-    background: '#0B0B12',
-    surface: '#15151F',
-    surfaceSecondary: '#1C1C28',
-    textPrimary: '#F8FAFC',
-    textSecondary: '#A1A1AA',
-    brand: brand[400],
-    border: 'rgba(255,255,255,0.08)',
+    background: '#09090A',
+    surface: '#171719',
+    surfaceSecondary: '#202023',
+    textPrimary: '#F7F7F7',
+    textSecondary: '#9B9B9F',
+    brand: '#FFFFFF',
+    border: 'rgba(255,255,255,0.09)',
   },
 } as const;
 
@@ -196,39 +196,39 @@ export const glass = {
       background: 'rgba(255,255,255,0.40)',
       border: 'rgba(255,255,255,0.50)',
       blur: 12,
-      fallback: '#EEEDF6',
+      fallback: '#FFFFFF',
     },
     default: {
       background: 'rgba(255,255,255,0.55)',
       border: 'rgba(255,255,255,0.60)',
       blur: 20,
-      fallback: '#F2F1F9',
+      fallback: '#FFFFFF',
     },
     elevated: {
       background: 'rgba(255,255,255,0.75)',
       border: 'rgba(255,255,255,0.70)',
       blur: 28,
-      fallback: '#F7F6FC',
+      fallback: '#FFFFFF',
     },
   },
   dark: {
     subtle: {
-      background: 'rgba(25,25,38,0.45)',
+      background: 'rgba(23,23,25,0.82)',
       border: 'rgba(255,255,255,0.06)',
       blur: 12,
-      fallback: '#191924',
+      fallback: '#151517',
     },
     default: {
-      background: 'rgba(25,25,38,0.60)',
+      background: 'rgba(23,23,25,0.90)',
       border: 'rgba(255,255,255,0.08)',
       blur: 20,
-      fallback: '#1B1B27',
+      fallback: '#18181A',
     },
     elevated: {
-      background: 'rgba(25,25,38,0.75)',
+      background: 'rgba(23,23,25,0.96)',
       border: 'rgba(255,255,255,0.10)',
       blur: 28,
-      fallback: '#1E1E2B',
+      fallback: '#1C1C1E',
     },
   },
 } as const;
@@ -248,22 +248,22 @@ export const glass = {
 
 export const saviGlow = {
   /** rgba(139,92,246,0.07) over glass.light.default.fallback. */
-  surfaceLight: '#EBE7F9',
+  surfaceLight: '#FFFFFF',
   /** rgba(139,92,246,0.10) over glass.dark.default.fallback. */
-  surfaceDark: '#26223C',
+  surfaceDark: '#1C1C1E',
   /** The ambient shadow. Inside §65's 8–15% band — it marks, it does not shout. */
-  shadow: '0 8px 30px rgba(139,92,246,0.15)',
+  shadow: '0 10px 30px rgba(0,0,0,0.08)',
   /** Attention keeps the brand hue, one step stronger — never a red alarm (§63). */
-  shadowAttention: '0 8px 30px rgba(139,92,246,0.22)',
+  shadowAttention: '0 10px 30px rgba(0,0,0,0.12)',
 } as const;
 
 /**
  * Ambient background orbs (§11). Opacity stays 5–15% — never dominant.
  */
 export const ambient = {
-  purple: brand[500],
-  blue: '#06B6D4',
-  opacity: 0.12,
+  purple: '#000000',
+  blue: '#000000',
+  opacity: 0,
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -350,6 +350,7 @@ export const radius = {
   xl: 20,
   '2xl': 24,
   '3xl': 32,
+  '4xl': 68,
   full: 9999,
 } as const;
 
@@ -362,7 +363,7 @@ export const layout = {
   breakpointTablet: 768,
   breakpointDesktop: 1024,
   /** Floating nav (§27). */
-  navHeight: 76,
+  navHeight: 68,
   fabSize: 56,
   /**
    * A15: every scrollable screen needs this much bottom padding, plus the
@@ -386,12 +387,12 @@ export const layout = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const shadow = {
-  xs: { boxShadow: '0 2px 8px rgba(31,38,135,0.04)', elevation: 1 },
-  sm: { boxShadow: '0 4px 16px rgba(31,38,135,0.06)', elevation: 2 },
-  md: { boxShadow: '0 8px 30px rgba(31,38,135,0.08)', elevation: 6 },
-  lg: { boxShadow: '0 16px 40px rgba(31,38,135,0.12)', elevation: 12 },
+  xs: { boxShadow: '0 2px 8px rgba(0,0,0,0.04)', elevation: 1 },
+  sm: { boxShadow: '0 4px 16px rgba(0,0,0,0.06)', elevation: 2 },
+  md: { boxShadow: '0 8px 30px rgba(0,0,0,0.08)', elevation: 6 },
+  lg: { boxShadow: '0 16px 40px rgba(0,0,0,0.12)', elevation: 12 },
   /** FAB (§23) — brand-tinted. */
-  fab: { boxShadow: '0 8px 24px rgba(124,58,237,0.25)', elevation: 8 },
+  fab: { boxShadow: '0 8px 24px rgba(0,0,0,0.24)', elevation: 8 },
 } as const;
 
 export const shadowDark = {
@@ -473,7 +474,7 @@ export const focus = {
   offset: 2,
   color: brandRole.action,
   /** Input focus glow (§36). */
-  glow: 'rgba(139,92,246,0.15)',
+  glow: 'rgba(0,0,0,0.12)',
   glowBorder: brand[500],
 } as const;
 

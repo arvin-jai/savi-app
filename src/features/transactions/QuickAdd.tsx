@@ -12,7 +12,7 @@
  * (P§61). An inference the user can't see is a bug they can't report.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 
 import { GlassSheet } from '@/components/glass/GlassSheet';
@@ -26,7 +26,7 @@ import { useCreateEvent, useCreateTask } from '@/features/calendar/api';
 import { todayISO } from '@/lib/dates';
 import { parseMoney } from '@/lib/money';
 import type { Classification, EventKind, TaskPriority } from '@/lib/database.types';
-import { useTheme } from '@/theme/ThemeProvider';
+import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 import { space, type CategoryName } from '@/theme/tokens';
 
 import { useCategories, useCreateTransaction, useCreateTransfer, useTransactions } from './api';
@@ -48,6 +48,31 @@ const CLASSIFICATIONS: { value: Classification; label: string }[] = [
 ];
 
 export function QuickAdd({
+  visible,
+  onClose,
+  onSaved,
+  initialMode = 'expense',
+}: {
+  visible: boolean;
+  onClose: () => void;
+  onSaved: (message: string) => void;
+  initialMode?: Mode;
+}) {
+  if (!visible) return null;
+
+  return (
+    <ThemeProvider forcedTheme="dark">
+      <QuickAddContent
+        visible={visible}
+        onClose={onClose}
+        onSaved={onSaved}
+        initialMode={initialMode}
+      />
+    </ThemeProvider>
+  );
+}
+
+function QuickAddContent({
   visible,
   onClose,
   onSaved,
@@ -80,29 +105,13 @@ export function QuickAdd({
   // but stop the moment they make a choice of their own.
   const [classificationOverride, setClassificationOverride] = useState<Classification | null>(null);
   const [categoryOverride, setCategoryOverride] = useState<string | null>(null);
-  const [accountId, setAccountId] = useState<string | null>(null);
+  const [accountId, setAccountId] = useState<string | null>(defaultAccount?.id ?? null);
   const [toAccountId, setToAccountId] = useState<string | null>(null);
   const [date, setDate] = useState(todayISO());
   const [priority, setPriority] = useState<TaskPriority>('medium');
   const [eventKind, setEventKind] = useState<EventKind>('personal');
 
   const isMoneyMode = MONEY_MODES.includes(mode);
-
-  useEffect(() => {
-    if (!visible) return;
-    // Fresh sheet every time. A stale amount from last time is a wrong-amount
-    // transaction waiting to happen.
-    setMode(initialMode);
-    setAmount('');
-    setDescription('');
-    setShowDetails(false);
-    setError(null);
-    setClassificationOverride(null);
-    setCategoryOverride(null);
-    setAccountId(null);
-    setToAccountId(null);
-    setDate(todayISO());
-  }, [visible, initialMode]);
 
   const inference = useMemo(
     () => inferFromDescription(description, history),
@@ -112,7 +121,17 @@ export function QuickAdd({
   const classification = classificationOverride ?? inference.classification;
   const categorySlug = categoryOverride ?? inference.categorySlug;
   const category = categories.find((c) => c.slug === categorySlug) ?? null;
-  const fromAccount = accounts.find((a) => a.id === (accountId ?? defaultAccount?.id)) ?? null;
+  /**
+   * The chosen account, with NO fallback to the default.
+   *
+   * This used to read `accountId ?? defaultAccount?.id`, which meant an
+   * expense could be filed against an account the user had never seen — the
+   * picker was behind "More details" and most people never opened it. Money
+   * landing somewhere unseen is the one kind of silence a ledger cannot
+   * afford, so the account is now a visible, required choice: pre-selected
+   * for speed (P§9), but never inferred at save time.
+   */
+  const fromAccount = accounts.find((a) => a.id === accountId) ?? null;
   const toAccount = accounts.find((a) => a.id === toAccountId) ?? null;
 
   const amountMinor = parseMoney(amount);
@@ -162,7 +181,25 @@ export function QuickAdd({
       return;
     }
 
-    if (!amountValid || !fromAccount) return;
+    /**
+     * Say why, rather than doing nothing.
+     *
+     * Save is disabled until these hold, so this is the belt to that braces —
+     * but a silent `return` from a tap the user believed would work is the
+     * worst outcome of the three, so the reason is stated.
+     */
+    if (!amountValid) {
+      setError('Enter an amount first.');
+      return;
+    }
+    if (!fromAccount) {
+      setError(
+        accounts.length === 0
+          ? 'Add an account first — money has to come from somewhere.'
+          : 'Choose which account this came from.'
+      );
+      return;
+    }
 
     try {
       if (mode === 'transfer') {
@@ -204,7 +241,18 @@ export function QuickAdd({
     <GlassSheet
       visible={visible}
       onClose={onClose}
-      title="Add"
+      fullScreen
+      title={
+        mode === 'expense'
+          ? 'Add expense'
+          : mode === 'income'
+            ? 'Add income'
+            : mode === 'transfer'
+              ? 'Move money'
+              : mode === 'task'
+                ? 'Add task'
+                : 'Add event'
+      }
       footer={
         <View style={{ gap: space[3] }}>
           {error && (
@@ -243,7 +291,14 @@ export function QuickAdd({
       />
 
       {/* ── First level (D§60) ──────────────────────────────────────────── */}
-      {isMoneyMode && <MoneyInput value={amount} onChangeText={setAmount} autoFocus />}
+      {isMoneyMode && (
+        <MoneyInput
+          label="Transaction amount"
+          value={amount}
+          onChangeText={setAmount}
+          autoFocus
+        />
+      )}
 
       <Input
         label={
@@ -315,12 +370,55 @@ export function QuickAdd({
         />
       )}
 
+      {/**
+       * Account — first level, and required.
+       *
+       * D§60 keeps the first level to Amount and "What was it?", and this is a
+       * deliberate, recorded exception to that for the money modes only: the
+       * account answers "where did this come from", which is not a detail the
+       * way a note or a date is. Buried behind "More details" it was invisible
+       * in practice, so every expense went to the default account whether or
+       * not that was true.
+       */}
+      {isMoneyMode && (
+        <View style={{ gap: space[2] }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: space[2] }}>
+            <Text variant="label" tone="secondary">
+              {mode === 'transfer' ? 'From account' : 'Account'}
+            </Text>
+            <Text variant="micro" tone={fromAccount ? 'secondary' : 'danger'}>
+              {fromAccount ? 'Required' : 'Required — pick one'}
+            </Text>
+          </View>
+
+          {accounts.length === 0 ? (
+            <Text variant="caption" tone="secondary">
+              You have no accounts yet. Add one first so this has somewhere to go.
+            </Text>
+          ) : (
+            <ChipRow>
+              {accounts.map((a) => (
+                <Chip
+                  key={a.id}
+                  label={accountLabel(a, accounts)}
+                  selected={a.id === accountId}
+                  onPress={() => setAccountId(a.id)}
+                />
+              ))}
+            </ChipRow>
+          )}
+        </View>
+      )}
+
       {mode === 'transfer' && (
         <View style={{ gap: space[2] }}>
           <Text variant="label" tone="secondary">
             To account
           </Text>
-          {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
+          {/* `fromAccount?.` is a real optional now: the account no longer
+              falls back to the default, so it is genuinely null until picked.
+              The suppression that used to sit here was for when it could not
+              be. */}
           <ChipRow>
             {accounts
               .filter((a) => a.id !== fromAccount?.id)
@@ -366,21 +464,8 @@ export function QuickAdd({
         open={showDetails}
         onToggle={() => setShowDetails((v) => !v)}
       >
-        <View style={{ gap: space[2] }}>
-          <Text variant="label" tone="secondary">
-            {mode === 'transfer' ? 'From account' : 'Account'}
-          </Text>
-          <ChipRow>
-            {accounts.map((a) => (
-              <Chip
-                key={a.id}
-                label={accountLabel(a, accounts)}
-                selected={a.id === (accountId ?? defaultAccount?.id)}
-                onPress={() => setAccountId(a.id)}
-              />
-            ))}
-          </ChipRow>
-        </View>
+        {/* The account picker used to live here. It moved to the first level
+            when it became a required choice — see the block above. */}
 
         {mode === 'expense' && (
           <View style={{ gap: space[2] }}>

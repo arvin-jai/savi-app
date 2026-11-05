@@ -1533,6 +1533,59 @@ money↔time connection (P§35) is what makes it a different product.
 > whole point of the entry above it, so treat both changes as proposals until a build confirms
 > them.
 
+> ### ✅ M22 — onboarding is a fact, not an inference, 2026-08-17
+>
+> Two reports, one root cause between them.
+>
+> **1. Logging in re-ran onboarding for an account that already existed.** The dashboard asked
+> "is `accounts.length === 0`?" and treated yes as "brand new user". That question has at least
+> four answers that are not that: the query has not resolved; it resolved for a *different*
+> session; every account is archived (the query filters `archived_at is null`); or the user is
+> signed out and RLS is correctly returning nothing. M19 fixed the timing case and left the
+> premise — which is why this is the **fourth** TanStack-cache-disagrees-with-the-database entry
+> in this file.
+>
+> Onboarding is now recorded where it happened: `profiles.onboarded_at`
+> ([20260817000100](../supabase/migrations/20260817000100_onboarding_completion.sql)), backfilled
+> from each user's first account so no existing user gets setup once more from the fix itself.
+> The rule moved out of the screen effect into `onboardingDecision()`
+> ([status.ts](../src/features/onboarding/status.ts)) with a third answer, `wait` — the honest
+> state the two-way version could not express. Account count survives only as the fallback for a
+> profile that has never been onboarded.
+>
+> One hazard worth naming: the rule tests `onboarded_at` for **truthiness**, not `!== null`.
+> A client running ahead of its schema gets `undefined` from `select *`, and `undefined !== null`
+> would have marked every user onboarded and hidden setup from genuinely new ones. Truthiness
+> degrades to the old account-count behaviour instead.
+>
+> **2. The cache outlives the session, and that was never only an onboarding bug.** `qk.accounts`
+> is literally `['accounts']` — not keyed by user — with `gcTime` 24h, and nothing emptied it on
+> sign-out. Sign in as a different user on the same device and, until each refetch lands, they are
+> reading the previous user's balances. Sign out and back in inside `staleTime` (30s) and *no
+> refetch runs at all*, so the `isFetching` guard cannot help: it guards a refetch in flight, not
+> one that never starts. That last case is how the stale `[]` from a sign-out race reached the
+> dashboard as "new user". `AuthProvider` now clears the whole cache when the user id changes —
+> on the change, not on every event, because `onAuthStateChange` also fires for silent token
+> refresh.
+>
+> **3. Welcome is a first-run screen again.** It was the landing for every signed-out user, so
+> anyone who signed out tapped through the pitch to reach a password field. Shown once per
+> install now, Login after that ([landing.ts](../src/features/auth/landing.ts) — pure, with the
+> AsyncStorage half in `launchStore.ts`). No entry point is lost: Welcome's two buttons are Login
+> and Signup, and Login already carries "Create an account". First *launch*, not first sign-in —
+> the introduction has been delivered whether or not anyone made an account.
+>
+> **Verified:** typecheck, 435 tests (15 new, all pure), lint clean on every changed file.
+> **Unverified, and the list is the point:**
+> - **The migration has never run.** Docker was not available in this session, so
+>   `20260817000100` is unapplied against local *and* hosted, and `supabase/tests/onboarding.sql`
+>   (new, wired into `db:test:all`) has never executed. Until it is applied, item 1 is inert —
+>   the truthiness fallback keeps the old behaviour rather than breaking, but nothing is fixed.
+> - **The hosted project needs it too.** The device build points at hosted (see M19 item 3), so
+>   local `migration up` fixes nothing on a phone.
+> - **Not device-verified.** Neither the login→dashboard path nor the fresh-install→Welcome path
+>   has been tapped.
+
 ---
 
 ## v0.3 — M7 — Notifications

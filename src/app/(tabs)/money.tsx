@@ -24,14 +24,25 @@ import { QuickAdd } from '@/features/transactions/QuickAdd';
 import { TransactionDetail } from '@/features/transactions/TransactionDetail';
 import { TransactionList } from '@/features/transactions/TransactionList';
 import { formatMoney } from '@/lib/money';
+import { accountRoute } from '@/lib/routes';
+import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 import { layout, space, z } from '@/theme/tokens';
 import { useBreakpoint } from '@/theme/useBreakpoint';
 
 export default function Money() {
+  return (
+    <ThemeProvider forcedTheme="dark">
+      <MoneyWorkspace />
+    </ThemeProvider>
+  );
+}
+
+function MoneyWorkspace() {
   const { data: summary } = useFinancialSummary();
   const { data: accounts = [] } = useAccounts();
   const { data: bills = [] } = useBills();
   const { pagePadding, useSidebar } = useBreakpoint();
+  const theme = useTheme();
 
   const upcomingBills = bills.filter((b) => b.status !== 'paid');
 
@@ -54,6 +65,9 @@ export default function Money() {
           }}
         >
           <Text variant="h1">Money</Text>
+          <Text variant="caption" tone="secondary">
+            Your accounts, bills, and recent activity
+          </Text>
         </View>
         <TransactionList
           onSelect={setSelected}
@@ -126,7 +140,11 @@ export default function Money() {
                         variant="subtle"
                         padding="md"
                         interactive
-                        onPress={() => router.push('/accounts')}
+                        // Its own ledger, not the management screen: from here
+                        // the question is "what happened in this account", and
+                        // /accounts answers "let me rename or archive it".
+                        onPress={() => router.push(accountRoute(a.id))}
+                        accessibilityLabel={`${a.name}, ${formatMoney(a.balance_minor)}. View transactions.`}
                         style={{ width: 150, gap: space[1] }}
                       >
                         <Text variant="caption" tone="secondary" numberOfLines={1}>
@@ -257,7 +275,7 @@ export default function Money() {
           }}
         >
           <Fab accessibilityLabel="Add transaction" onPress={() => setAdding(true)}>
-            <Text variant="h3" tone="onBrand">
+            <Text variant="h3" tone="onBrand" style={{ color: theme.isDark ? '#111111' : '#FFFFFF' }}>
               +
             </Text>
           </Fab>

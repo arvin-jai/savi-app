@@ -45,6 +45,7 @@ import { Input, MoneyInput } from '@/components/ui/Input';
 import { ACCOUNT_TYPE_LABELS, useCreateAccount } from '@/features/accounts/api';
 import { useBills, useCreateBill } from '@/features/bills/api';
 import { useCreateRecurringIncome } from '@/features/insights/api';
+import { useMarkOnboarded } from '@/features/onboarding/api';
 import { useLock } from '@/features/security/LockProvider';
 import { SetPin } from '@/features/security/SetPin';
 import { biometricLabel, isBiometricAvailable, isLockSupported } from '@/features/security/store';
@@ -80,6 +81,7 @@ export default function Onboarding() {
   const createAccount = useCreateAccount();
   const createIncome = useCreateRecurringIncome();
   const createBill = useCreateBill();
+  const markOnboarded = useMarkOnboarded();
   const { data: bills = [] } = useBills();
 
   const theme = useTheme();
@@ -213,20 +215,38 @@ export default function Onboarding() {
   }
 
   /**
-   * Wait for the accounts cache to actually hold the new account before
+   * Record that this happened, then wait for the caches to hold it before
    * navigating.
    *
-   * The dashboard sends anyone with zero accounts straight back here, and the
-   * cached `[]` from before onboarding stays readable until the invalidated
-   * refetch lands. The dashboard now also guards on `isFetching`, so this is
-   * belt and braces — but it is the half that removes the race outright rather
-   * than narrowing it, and a user bounced back into onboarding they just
-   * finished has no way to understand what happened.
+   * The write is what stops onboarding running a second time on any future
+   * launch, device or reinstall — the dashboard reads `profiles.onboarded_at`,
+   * not the account count. See `features/onboarding/status.ts`.
+   *
+   * The refetches are the same-session half. The dashboard reads both queries
+   * to decide, and the cached values here still describe the app as it was
+   * before this screen wrote anything; a stale read lands the user straight
+   * back on this screen with no way to understand what happened. `refetch`
+   * rather than `invalidate` because the difference is exactly the race: one
+   * returns when the data has arrived, the other when the request has been
+   * scheduled.
+   *
+   * A failed write is deliberately not fatal. Trapping someone on the last
+   * screen of setup because a PATCH failed is worse than the fallback, which is
+   * the old account-count rule — they own an account by now, so the dashboard
+   * keeps them.
    */
   async function finish() {
     setLeaving(true);
     try {
-      await qc.refetchQueries({ queryKey: qk.accounts });
+      await markOnboarded.mutateAsync();
+    } catch {
+      // Fallback above. The next finish() retries; the mutation is idempotent.
+    }
+    try {
+      await Promise.all([
+        qc.refetchQueries({ queryKey: qk.accounts }),
+        qc.refetchQueries({ queryKey: qk.profile }),
+      ]);
     } catch {
       // A failed refetch is not a reason to trap the user on this screen; the
       // dashboard will retry on mount.

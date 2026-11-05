@@ -56,7 +56,11 @@ export function Segmented<T extends string>({
                 justifyContent: 'center',
                 paddingVertical: space[2],
                 borderRadius: radius.sm,
-                backgroundColor: selected ? theme.color.surface : 'transparent',
+                backgroundColor: selected
+                  ? theme.isDark
+                    ? '#FFFFFF'
+                    : theme.color.surface
+                  : 'transparent',
               },
               selected && Platform.OS !== 'android' && { boxShadow: theme.shadow.xs.boxShadow },
               selected && Platform.OS === 'android' && { elevation: 1 },
@@ -68,7 +72,12 @@ export function Segmented<T extends string>({
               },
             ]}
           >
-            <Text variant="label" weight={selected ? '600' : '500'} tone={selected ? 'primary' : 'secondary'}>
+            <Text
+              variant="label"
+              weight={selected ? '600' : '500'}
+              tone={selected ? 'primary' : 'secondary'}
+              style={selected && theme.isDark ? { color: '#111111' } : undefined}
+            >
               {opt.label}
             </Text>
           </Pressable>
@@ -108,11 +117,15 @@ export function Chip({
           paddingVertical: space[2],
           borderRadius: radius.full,
           borderWidth: 1,
-          borderColor: selected ? brandRole.action : theme.color.border,
+          borderColor: selected
+            ? theme.isDark
+              ? '#FFFFFF'
+              : brandRole.action
+            : theme.color.border,
           backgroundColor: selected
             ? theme.isDark
-              ? 'rgba(139,92,246,0.18)'
-              : 'rgba(139,92,246,0.10)'
+              ? '#FFFFFF'
+              : 'rgba(0,0,0,0.06)'
             : 'transparent',
         },
         focused && {
@@ -128,7 +141,12 @@ export function Chip({
           style={{ width: 8, height: 8, borderRadius: radius.full, backgroundColor: dotColor }}
         />
       )}
-      <Text variant="label" weight={selected ? '600' : '500'} tone={selected ? 'brand' : 'secondary'}>
+      <Text
+        variant="label"
+        weight={selected ? '600' : '500'}
+        tone={selected ? 'brand' : 'secondary'}
+        style={selected && theme.isDark ? { color: '#111111' } : undefined}
+      >
         {label}
       </Text>
     </Pressable>

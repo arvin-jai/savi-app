@@ -68,7 +68,8 @@
     "db:test:grants": "docker cp supabase/tests/ai_tool_grants.sql supabase_db_Savi:/tmp/test5.sql && docker exec supabase_db_Savi psql -U postgres -d postgres -v ON_ERROR_STOP=1 -f /tmp/test5.sql",
     "db:test:hardening": "docker cp supabase/tests/hardening.sql supabase_db_Savi:/tmp/test6.sql && docker exec supabase_db_Savi psql -U postgres -d postgres -v ON_ERROR_STOP=1 -f /tmp/test6.sql",
     "db:test:shifts": "docker cp supabase/tests/work_schedules.sql supabase_db_Savi:/tmp/test7.sql && docker exec supabase_db_Savi psql -U postgres -d postgres -v ON_ERROR_STOP=1 -f /tmp/test7.sql",
-    "db:test:all": "npm run db:test && npm run db:test:calendar && npm run db:test:ai && npm run db:test:budgets && npm run db:test:grants && npm run db:test:shifts && npm run db:test:recurring && npm run db:test:hardening",
+    "db:test:onboarding": "docker cp supabase/tests/onboarding.sql supabase_db_Savi:/tmp/test9.sql && docker exec supabase_db_Savi psql -U postgres -d postgres -v ON_ERROR_STOP=1 -f /tmp/test9.sql",
+    "db:test:all": "npm run db:test && npm run db:test:calendar && npm run db:test:ai && npm run db:test:budgets && npm run db:test:grants && npm run db:test:shifts && npm run db:test:recurring && npm run db:test:onboarding && npm run db:test:hardening",
     "verify": "npm run typecheck && npm test",
     "db:reset": "supabase db reset",
     "db:test:recurring": "docker cp supabase/tests/recurring_generation.sql supabase_db_Savi:/tmp/test8.sql && docker exec supabase_db_Savi psql -U postgres -d postgres -v ON_ERROR_STOP=1 -f /tmp/test8.sql"

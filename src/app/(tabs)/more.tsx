@@ -10,6 +10,7 @@ import {
   CreditCard,
   PieChart,
   Receipt,
+  ShieldCheck,
   Settings as SettingsIcon,
   Target,
 } from 'lucide-react-native';
@@ -38,15 +39,18 @@ export default function More() {
 
   const openTasks = tasks.filter((t) => t.status !== 'done').length;
 
-  const rows = [
-    { title: 'Accounts', body: 'Where your money lives', icon: CreditCard, onPress: () => router.push('/accounts') },
-    { title: 'Bills', body: 'Recurring payments', icon: Receipt, onPress: () => router.push('/bills') },
-    { title: 'Budget', body: 'Your plan for the month', icon: PieChart, onPress: () => router.push('/budget') },
-    { title: 'Goals', body: 'What you are saving towards', icon: Target, onPress: () => router.push('/goals') },
-    { title: 'Tasks', body: 'What you need to do', icon: CheckSquare, count: openTasks, onPress: () => router.push('/tasks') },
+  const financialRows = [
+    { title: 'Accounts', body: 'Connected balances and net worth', icon: CreditCard, onPress: () => router.push('/accounts') },
+    { title: 'Bills & Subscriptions', body: 'Upcoming and recurring payments', icon: Receipt, onPress: () => router.push('/bills') },
+    { title: 'Budget & Cashflow', body: 'Income, bills, needs, and wants', icon: PieChart, onPress: () => router.push('/budget') },
+    { title: 'Savings Goals', body: 'Emergency funds and milestones', icon: Target, onPress: () => router.push('/goals') },
+  ] as { title: string; body: string; icon: typeof CreditCard; count?: number; onPress: () => void }[];
+
+  const planningRows = [
+    { title: 'Tasks & Reminders', body: 'Keep your money plans moving', icon: CheckSquare, count: openTasks, onPress: () => router.push('/tasks') },
     // Not "Profile, appearance, data" any more — profile moved to the card
     // above, and listing it here sent people to the wrong place for their name.
-    { title: 'Settings', body: 'Appearance, security, notifications', icon: SettingsIcon, onPress: () => router.push('/settings') },
+    { title: 'Settings & Preferences', body: 'Appearance, security, notifications', icon: SettingsIcon, onPress: () => router.push('/settings') },
   ] as { title: string; body: string; icon: typeof CreditCard; count?: number; onPress: () => void }[];
 
   return (
@@ -70,7 +74,12 @@ export default function More() {
             gap: space[4],
           }}
         >
-          <Text variant="h1">More</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: space[2] }}>
+            <Text variant="h1">More</Text>
+            <View style={{ paddingHorizontal: space[2], paddingVertical: 2, borderRadius: radius.full, backgroundColor: theme.color.surfaceSecondary }}>
+              <Text variant="micro" tone="secondary">v2.4</Text>
+            </View>
+          </View>
 
           {/* Profile row (handoff 2e) — avatar, name, email, chevron. */}
           <GlassCard
@@ -119,7 +128,10 @@ export default function More() {
           }}
         >
           <View style={{ gap: space[2] }}>
-            {rows.map((row) => (
+            <Text variant="micro" tone="secondary" style={{ letterSpacing: 0.8 }}>
+              FINANCIAL HUB
+            </Text>
+            {financialRows.map((row) => (
               <ListRow
                 key={row.title}
                 icon={row.icon}
@@ -130,6 +142,29 @@ export default function More() {
               />
             ))}
           </View>
+
+          <View style={{ gap: space[2] }}>
+            <Text variant="micro" tone="secondary" style={{ letterSpacing: 0.8 }}>
+              PLANNING & APP
+            </Text>
+            {planningRows.map((row) => (
+              <ListRow
+                key={row.title}
+                icon={row.icon}
+                label={row.title}
+                hint={row.body}
+                count={row.count}
+                onPress={row.onPress}
+              />
+            ))}
+          </View>
+
+          <ListRow
+            icon={ShieldCheck}
+            label="Data & Privacy"
+            hint="Local protection, export, and backups"
+            onPress={() => router.push('/settings')}
+          />
 
           {/* Developer surfaces are hidden from release builds rather than
               deleted. The kitchen sink is the review harness M1 made permanent

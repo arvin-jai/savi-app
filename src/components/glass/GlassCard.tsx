@@ -94,6 +94,15 @@ export type GlassCardProps = {
   interactive?: boolean;
   onPress?: () => void;
   /**
+   * What this card announces when it is a button.
+   *
+   * Without it a screen reader reads the card's children in order, which for a
+   * card built out of fragments — a name, a number, a warning — is a run-on
+   * with no statement of what tapping it does. Ignored on a non-interactive
+   * card, where the children are the content rather than a label.
+   */
+  accessibilityLabel?: string;
+  /**
    * Request backdrop blur. Ignored inside lists by convention — see the module
    * comment. Defaults to false so the safe path is the default path.
    */
@@ -120,9 +129,10 @@ export type GlassCardProps = {
 export function GlassCard({
   children,
   variant = 'default',
-  radius = 'xl',
+  radius = 'lg',
   padding = 'md',
   interactive = false,
+  accessibilityLabel,
   onPress,
   blur = false,
   allowAndroidBlur = false,
@@ -154,8 +164,8 @@ export function GlassCard({
   const dropShadow = glow
     ? { boxShadow: glow }
     : Platform.OS === 'android'
-      ? { elevation: theme.shadow.md.elevation }
-      : { boxShadow: theme.shadow.md.boxShadow };
+      ? { elevation: theme.shadow.sm.elevation }
+      : { boxShadow: theme.shadow.sm.boxShadow };
 
   const content = (
     <View style={[shape, surface, dropShadow, style]} testID={testID}>
@@ -178,6 +188,7 @@ export function GlassCard({
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
       style={({ pressed }) => (pressed ? { transform: [{ scale: pressScale.card }] } : null)}
     >
       {content}

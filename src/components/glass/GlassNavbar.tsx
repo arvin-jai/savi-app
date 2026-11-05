@@ -19,9 +19,9 @@ import type { LucideIcon } from 'lucide-react-native';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ANDROID_BLUR, BLUR_IS_CHEAP, surfaceColor } from '@/components/glass/GlassCard';
+import { ANDROID_BLUR, BLUR_IS_CHEAP } from '@/components/glass/GlassCard';
 import { useTheme } from '@/theme/ThemeProvider';
-import { a11y, focus, iconSize, layout, radius, space, z } from '@/theme/tokens';
+import { a11y, focus, iconSize, radius, space, z } from '@/theme/tokens';
 
 export type NavTab = {
   name: string;
@@ -74,11 +74,11 @@ export function GlassNavbar({ tabs, state, navigation }: TabBarProps & { tabs: N
         right: space[4],
         bottom: Math.max(insets.bottom, space[3]),
         zIndex: z.bottomNav,
-        height: layout.navHeight,
-        borderRadius: radius['2xl'],
+        height: 62,
+        borderRadius: radius.full,
         borderWidth: 1,
         borderColor: level.border,
-        backgroundColor: surfaceColor(level, blurred),
+        backgroundColor: theme.isDark ? '#171719' : '#FFFFFF',
         overflow: 'hidden',
         flexDirection: 'row',
         /**
@@ -113,7 +113,11 @@ export function GlassNavbar({ tabs, state, navigation }: TabBarProps & { tabs: N
 
         const active = state.index === index;
         const Icon = tab.icon;
-        const color = active ? theme.color.brand : theme.color.textSecondary;
+        const color = active
+          ? theme.isDark
+            ? '#111111'
+            : '#FFFFFF'
+          : theme.color.textSecondary;
 
         const onPress = () => {
           const event = navigation.emit({
@@ -145,15 +149,11 @@ export function GlassNavbar({ tabs, state, navigation }: TabBarProps & { tabs: N
                 // Taller now that the label is gone: the row still has to give
                 // every tab a 44px target (D§44), and the icon alone does not.
                 minHeight: a11y.minTouchTarget,
-                borderRadius: radius.full,
+                borderRadius: radius['3xl'],
                 // A shape cue for the active tab, so "which one am I on" does
                 // not rest on icon colour alone — the thing the label used to
                 // help with (A17).
-                backgroundColor: active
-                  ? theme.isDark
-                    ? 'rgba(167,139,250,0.16)'
-                    : 'rgba(124,58,237,0.10)'
-                  : 'transparent',
+                backgroundColor: 'transparent',
               },
               focused && {
                 outlineWidth: focus.width,
@@ -175,7 +175,22 @@ export function GlassNavbar({ tabs, state, navigation }: TabBarProps & { tabs: N
                   rest on colour alone (D§44's actual requirement)
                 - the pill behind the active icon, a non-colour cue
             */}
-            <Icon size={iconSize.lg} color={color} strokeWidth={active ? 2.4 : 2} />
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: radius.full,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: active
+                  ? theme.isDark
+                    ? '#FFFFFF'
+                    : '#171717'
+                  : 'transparent',
+              }}
+            >
+              <Icon size={iconSize.md} color={color} strokeWidth={active ? 2.4 : 2} />
+            </View>
           </Pressable>
         );
       })}

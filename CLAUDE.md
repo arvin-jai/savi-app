@@ -73,10 +73,10 @@ answers "where did it go" with a waterfall.
 npm run verify                                 # typecheck + tests — the quick gate
 npm run typecheck                              # tsc --noEmit
 npx deno check supabase/functions/*/index.ts   # the 2 files tsc cannot see (Deno globals)
-npm test                                        # jest, 420 tests
+npm test                                        # jest, 435 tests
 npx jest src/features/bills                     # one directory
 npx jest -t "clamps the 31st"                   # one test by name
-npm run db:test:all                             # all 8 SQL suites (~121 checks), needs Supabase up
+npm run db:test:all                             # all 9 SQL suites, needs Supabase up
 npm run db:test:budgets                         # one suite — see package.json for the rest
 npm run lint
 ```
@@ -91,6 +91,22 @@ adb reverse tcp:8081 tcp:8081 && adb reverse tcp:54321 tcp:54321   # BOTH, or th
 npx expo start --dev-client --port 8081
 npm run web                                     # also wants 8081 — run one or the other
 ```
+
+`.claude/launch.json` runs web on **8082** (`savi-web`) precisely so it does not collide with the
+device server on 8081 — both can be up at once. Start it through the preview tooling rather than
+a bare `npm run web` when a dev-client session is already running.
+
+### Two config files that look like boilerplate and are not
+
+- **`metro.config.js`** exists for one reason: `expo run:android` makes Gradle write build
+  intermediates *inside* `node_modules/<pkg>/android/build/` (8.7 GB here), and Metro watches
+  them — producing an `ENOENT … watch '…/mergeReleaseResources/out/single'` crash and `EMFILE`
+  on a second instance. Neither message mentions Gradle. The `blockList` is the belt; deleting
+  those directories is the braces. The header comment has the PowerShell one-liner.
+- **`nativewind` is a dependency but is deliberately not wired up.** `src/global.css` is plain
+  CSS with no Tailwind directives and there is no `tailwind.config.js`, so `metro.config.js`
+  does *not* call `withNativeWind`. Styling goes through the design-system primitives, not
+  utility classes — do not "fix" this by adding the Tailwind pipeline.
 
 ## Architecture
 

@@ -201,8 +201,8 @@ export function MoneyInput({
             flexDirection: 'row',
             alignItems: 'center',
             gap: space[3],
-            minHeight: 64,
-            borderRadius: radius.md,
+            minHeight: theme.isDark ? 112 : 64,
+            borderRadius: theme.isDark ? radius.xl : radius.md,
             borderWidth: 1,
             borderColor: error
               ? theme.semanticText('danger')
@@ -210,7 +210,7 @@ export function MoneyInput({
                 ? focus.glowBorder
                 : theme.color.border,
             backgroundColor: theme.isDark
-              ? 'rgba(255,255,255,0.04)'
+              ? theme.color.surfaceSecondary
               : 'rgba(255,255,255,0.55)',
             paddingHorizontal: space[4],
           },
@@ -239,8 +239,8 @@ export function MoneyInput({
               // 375px viewport even with flex: 1 set.
               minWidth: 0,
               alignSelf: 'stretch',
-              fontSize: moneyType.input.size,
-              lineHeight: moneyType.input.lineHeight,
+              fontSize: theme.isDark ? 36 : moneyType.input.size,
+              lineHeight: theme.isDark ? 44 : moneyType.input.lineHeight,
               fontWeight: moneyType.input.weight,
               letterSpacing: moneyType.input.letterSpacing,
               color: theme.color.textPrimary,

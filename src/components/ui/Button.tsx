@@ -65,15 +65,16 @@ export function Button({
     switch (variant) {
       case 'primary':
         return {
-          bg: brandRole.action, // #7C3AED — 5.70:1 with white (A3)
+          bg: theme.isDark ? '#FFFFFF' : brandRole.action,
           // Hover and press both go DARKER, never lighter. brand[500] would be
           // the intuitive "lighter on hover", but it measures 4.22:1 against
           // white and fails AA — the exact trap A3 documents. Verified by the
           // kitchen-sink contrast audit, which caught it at 4.23:1.
-          bgHover: brandRole.pressed, // #6D28D9 — 6.63:1
-          bgPressed: brand[800], // #5B21B6 — 8.59:1
+          bgHover: theme.isDark ? '#F0F0F0' : brandRole.pressed,
+          bgPressed: theme.isDark ? '#DFDFDF' : brand[800],
           border: 'transparent',
           tone: 'onBrand' as const,
+          labelColor: theme.isDark ? '#111111' : '#FFFFFF',
         };
       case 'danger':
         // Fixed in BOTH themes, deliberately. A solid button always carries
@@ -87,6 +88,7 @@ export function Button({
           bgPressed: '#7F1D1D', // 9.9:1
           border: 'transparent',
           tone: 'onBrand' as const,
+          labelColor: '#FFFFFF',
         };
       case 'secondary':
         return {
@@ -95,6 +97,7 @@ export function Button({
           bgHover: theme.isDark ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.60)',
           border: theme.isDark ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.60)',
           tone: 'brand' as const,
+          labelColor: theme.color.brand,
         };
       case 'ghost':
       default:
@@ -104,6 +107,7 @@ export function Button({
           bgHover: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
           border: 'transparent',
           tone: 'brand' as const,
+          labelColor: theme.color.brand,
         };
     }
   })();
@@ -165,10 +169,10 @@ export function Button({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={palette.tone === 'onBrand' ? '#FFFFFF' : theme.color.brand}
+          color={palette.labelColor}
         />
       ) : (
-        <Text variant="body" weight="600" tone={palette.tone}>
+        <Text variant="body" weight="600" tone={palette.tone} style={{ color: palette.labelColor }}>
           {label}
         </Text>
       )}
@@ -202,7 +206,13 @@ export function Fab({
           width: 56,
           height: 56,
           borderRadius: radius.full,
-          backgroundColor: pressed ? brandRole.pressed : brandRole.action,
+          backgroundColor: theme.isDark
+            ? pressed
+              ? '#DFDFDF'
+              : '#FFFFFF'
+            : pressed
+              ? brandRole.pressed
+              : brandRole.action,
           alignItems: 'center',
           justifyContent: 'center',
           /**

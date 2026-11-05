@@ -22,6 +22,13 @@ export type Profile = {
   id: string;
   display_name: string | null;
   currency: string;
+  /**
+   * When onboarding was completed; null means never. Server-side on purpose —
+   * it has to survive a reinstall and follow the user to a second device,
+   * which is what an empty account list cannot tell you (see the migration
+   * 20260817000100 and `features/onboarding/status.ts`).
+   */
+  onboarded_at: string | null;
   created_at: string;
   updated_at: string;
 };

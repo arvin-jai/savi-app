@@ -24,3 +24,15 @@ import type { Href } from 'expo-router';
 
 /** The dashboard, i.e. `(tabs)/index.tsx`. */
 export const HOME: Href = '/(tabs)' as Href;
+
+/**
+ * One account's own ledger, i.e. `account/[id].tsx`.
+ *
+ * A helper rather than a bare string at each call site: the object form is the
+ * one that survives the typed-route generator, and keeping the single cast here
+ * means the same problem this file already documents does not get solved four
+ * different ways across the screens that link to an account.
+ */
+export function accountRoute(id: string): Href {
+  return { pathname: '/account/[id]', params: { id } } as Href;
+}
